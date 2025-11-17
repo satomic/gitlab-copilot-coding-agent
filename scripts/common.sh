@@ -12,9 +12,3 @@ require_env() {
     exit 1
   fi
 }
-
-copilot_login() {
-  require_env COPILOT_ACCESS_TOKEN
-  eval "$(github-copilot-cli alias -- bash)"
-  echo "${COPILOT_ACCESS_TOKEN}" | github-copilot-cli auth login --token-stdin >/dev/null
-}

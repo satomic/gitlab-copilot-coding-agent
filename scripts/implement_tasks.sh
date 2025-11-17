@@ -11,7 +11,13 @@ require_env GITLAB_TOKEN
 require_env TARGET_REPO_URL
 require_env TARGET_BRANCH
 require_env NEW_BRANCH_NAME
-copilot_login
+
+if ! command -v copilot >/dev/null; then
+  echo "[ERROR] copilot CLI not found in PATH" >&2
+  exit 1
+fi
+
+echo "[INFO] Cloning target repository..."
 
 python3 <<'PY' > authed_repo_url.txt
 import os
@@ -27,20 +33,72 @@ PY
 
 AUTHED_URL="$(cat authed_repo_url.txt)"
 rm -rf repo-b
-GIT_TERMINAL_PROMPT=0 git clone "${AUTHED_URL}" repo-b >/dev/null
+GIT_TERMINAL_PROMPT=0 git clone "${AUTHED_URL}" repo-b >/dev/null 2>&1
+
+if [ ! -d repo-b ]; then
+  echo "[ERROR] Failed to clone repository" >&2
+  exit 1
+fi
+
 cd repo-b
 
+echo "[INFO] Setting up branch ${NEW_BRANCH_NAME}..."
 git fetch origin "${NEW_BRANCH_NAME}" >/dev/null 2>&1 || true
 git checkout -B "${NEW_BRANCH_NAME}" "origin/${NEW_BRANCH_NAME}" >/dev/null 2>&1 || git checkout -b "${NEW_BRANCH_NAME}" "${TARGET_BRANCH}" >/dev/null
+
 cp ../todo.md ./todo.md
 
-{
-  echo "Act as a coding agent. Repository path: $(pwd). Finish every todo item described below and output a unified diff patch enclosed in triple backticks."
-  echo
-  cat todo.md
-} > ../copilot_prompt.txt
+echo "[INFO] Building implementation prompt for Copilot..."
 
-copilot -p "$(cat ../copilot_prompt.txt)" > patch_raw.txt
+# Get repository context
+REPO_FILES=$(find . -type f -not -path '*/.git/*' -not -path '*/node_modules/*' | head -50 | tr '\n' ', ')
+
+IMPL_PROMPT="You are GitHub Copilot CLI acting as a coding agent.
+
+Repository Context:
+- Path: $(pwd)
+- Branch: ${NEW_BRANCH_NAME}
+- Base branch: ${TARGET_BRANCH}
+- Sample files: ${REPO_FILES}
+
+Task List:
+$(cat todo.md)
+
+Your job:
+1. Analyze the repository structure
+2. Implement ALL tasks from the checklist above
+3. Generate a unified diff patch with your changes
+4. Enclose the patch in triple backticks with 'diff' language marker
+
+Requirements:
+- Produce working, tested code
+- Follow existing code style and patterns
+- Include necessary imports and dependencies
+- Add inline comments for complex logic
+
+Output format:
+\`\`\`diff
+[your unified diff here]
+\`\`\`
+
+Generate the implementation now."
+
+echo "[INFO] Invoking Copilot for code generation (timeout: 600s)..."
+if timeout 600 copilot -p "$IMPL_PROMPT" > patch_raw.txt 2>&1; then
+  echo "[INFO] Copilot code generation completed"
+  # Clean ANSI escape sequences and carriage returns
+  sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' patch_raw.txt | tr -d '\r' > patch_clean.txt
+  mv patch_clean.txt patch_raw.txt
+else
+  EXIT_CODE=$?
+  if [ $EXIT_CODE -eq 124 ]; then
+    echo "[ERROR] Copilot timed out after 600 seconds" >&2
+  else
+    echo "[ERROR] Copilot failed with exit code ${EXIT_CODE}" >&2
+  fi
+  cat patch_raw.txt >&2
+  exit 1
+fi
 
 python3 <<'PY'
 import re

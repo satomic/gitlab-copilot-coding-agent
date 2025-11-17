@@ -2,38 +2,72 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/common.sh
 source "${SCRIPT_DIR}/common.sh"
 
 cd "${REPO_ROOT}"
 
 require_env ORIGINAL_NEEDS
-copilot_login
+require_env ISSUE_TITLE
+require_env TARGET_PROJECT_PATH
 
-python3 <<'PY'
-import os
-from pathlib import Path
+if ! command -v copilot >/dev/null; then
+  echo "[ERROR] copilot CLI not found in PATH" >&2
+  exit 1
+fi
 
-needs = os.getenv("ORIGINAL_NEEDS", "").strip()
-if not needs:
-    raise SystemExit("ORIGINAL_NEEDS is required")
+echo "[INFO] Generating execution plan with Copilot..."
 
-prompt = f"""
-You are GitHub Copilot CLI acting as a technical program manager.
-Take the ORIGINAL_NEEDS and output strict JSON with keys branch and todo_markdown.
-branch must be a short kebab-case feature branch.
-todo_markdown must be a Markdown todo list capturing concrete implementation steps.
-Return ONLY the JSON string without commentary.
+# Build comprehensive prompt for Copilot
+PLAN_PROMPT="You are GitHub Copilot CLI acting as a technical delivery lead.
 
-ORIGINAL_NEEDS:
-{needs}
-"""
+Task: Analyze the following GitLab issue and generate a concrete engineering plan.
 
-Path("prompt.txt").write_text(prompt, encoding="utf-8")
-PY
+Issue Context:
+- Title: ${ISSUE_TITLE}
+- IID: ${TARGET_ISSUE_IID}
+- Project: ${TARGET_PROJECT_PATH}
+- URL: ${ISSUE_URL}
 
-copilot -p "$(cat prompt.txt)" > plan_raw.txt
+Issue Description:
+${ORIGINAL_NEEDS}
 
+Your output must be valid JSON with exactly two keys:
+1. \"branch\": A kebab-case branch name (e.g., issue-${TARGET_ISSUE_IID}-add-login-feature)
+2. \"todo_markdown\": A Markdown checklist with actionable tasks using - [ ] format
+
+Requirements for the plan:
+- Break the issue into concrete, testable steps
+- Reference specific files/components when applicable
+- Include implementation, testing, and documentation tasks
+- Keep tasks focused and atomic
+- Use clear, imperative language
+
+Example output format:
+{
+  \"branch\": \"issue-1-implement-feature\",
+  \"todo_markdown\": \"- [ ] Create auth module\\n- [ ] Add unit tests\\n- [ ] Update documentation\"
+}
+
+Return ONLY the JSON, no additional commentary."
+
+echo "[INFO] Invoking Copilot with prompt (timeout: 300s)..."
+if timeout 300 copilot -p "$PLAN_PROMPT" > plan_raw.txt 2>&1; then
+  echo "[INFO] Copilot execution completed"
+  # Clean ANSI escape sequences and carriage returns
+  sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' plan_raw.txt | tr -d '\r' > plan_clean.txt
+  mv plan_clean.txt plan_raw.txt
+else
+  EXIT_CODE=$?
+  if [ $EXIT_CODE -eq 124 ]; then
+    echo "[ERROR] Copilot timed out after 300 seconds" >&2
+  else
+    echo "[ERROR] Copilot failed with exit code ${EXIT_CODE}" >&2
+  fi
+  echo "Raw output: $(cat plan_raw.txt 2>/dev/null || echo 'none')" >&2
+  exit 1
+fi
+
+echo "[INFO] Parsing Copilot response..."
 python3 <<'PY'
 import json
 import re
@@ -61,4 +95,8 @@ with open("plan.env", "w", encoding="utf-8") as env_file:
     env_file.write(f"NEW_BRANCH_NAME={branch}\n")
     env_file.write("TODO_FILE=todo.md\n")
 PY
-PY
+
+echo "[INFO] Plan generated successfully"
+echo "  Branch: $(grep NEW_BRANCH_NAME= plan.env | cut -d= -f2)"
+echo "  TODO file: todo.md"
+

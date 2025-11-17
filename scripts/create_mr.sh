@@ -12,12 +12,19 @@ require_env TARGET_PROJECT_ID
 require_env TARGET_BRANCH
 require_env NEW_BRANCH_NAME
 
+echo "[INFO] Creating merge request for branch ${NEW_BRANCH_NAME}..."
+
 API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
 
-curl --silent --show-error --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+echo "[INFO] Ensuring branch ${NEW_BRANCH_NAME} exists..."
+if curl --silent --show-error --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   --data "branch=${NEW_BRANCH_NAME}" \
   --data "ref=${TARGET_BRANCH}" \
-  --request POST "${API}/repository/branches" || echo "Branch may already exist"
+  --request POST "${API}/repository/branches" > /dev/null 2>&1; then
+  echo "[INFO] Branch created"
+else
+  echo "[INFO] Branch may already exist"
+fi
 
 TODO_BODY="$(cat todo.md)"
 cat <<EOF > mr_description.txt
@@ -28,14 +35,19 @@ EOF
 
 MR_TITLE="Auto MR for issue #${TARGET_ISSUE_IID:-unknown}"
 
-curl --silent --show-error --fail \
+echo "[INFO] Creating merge request: ${MR_TITLE}..."
+if ! curl --silent --show-error --fail \
   --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   --data-urlencode "source_branch=${NEW_BRANCH_NAME}" \
   --data-urlencode "target_branch=${TARGET_BRANCH}" \
   --data-urlencode "title=${MR_TITLE}" \
   --data-urlencode description@mr_description.txt \
-  "${API}/merge_requests" > mr.json
+  "${API}/merge_requests" > mr.json; then
+  echo "[ERROR] Failed to create merge request" >&2
+  exit 1
+fi
 
+echo "[INFO] Parsing merge request response..."
 python3 <<'PY'
 import json
 from pathlib import Path
@@ -47,3 +59,8 @@ if not iid:
     raise SystemExit("Merge request creation failed")
 Path("mr.env").write_text(f"NEW_MR_IID={iid}\nNEW_MR_URL={url}\n", encoding="utf-8")
 PY
+
+echo "[INFO] Merge request created successfully"
+echo "  MR IID: $(grep NEW_MR_IID= mr.env | cut -d= -f2)"
+echo "  MR URL: $(grep NEW_MR_URL= mr.env | cut -d= -f2)"
+
