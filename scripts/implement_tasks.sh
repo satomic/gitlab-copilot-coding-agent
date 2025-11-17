@@ -7,7 +7,7 @@ source "${SCRIPT_DIR}/common.sh"
 
 cd "${REPO_ROOT}"
 
-require_env GITLAB_ACCESS_TOKEN
+require_env GITLAB_TOKEN
 require_env TARGET_REPO_URL
 require_env TARGET_BRANCH
 require_env NEW_BRANCH_NAME
@@ -17,7 +17,7 @@ python3 <<'PY' > authed_repo_url.txt
 import os
 from urllib.parse import quote, urlparse, urlunparse
 
-token = os.environ["GITLAB_ACCESS_TOKEN"]
+token = os.environ["GITLAB_TOKEN"]
 repo = os.environ["TARGET_REPO_URL"]
 parsed = urlparse(repo)
 netloc = f"oauth2:{quote(token, safe='')}@{parsed.netloc}"

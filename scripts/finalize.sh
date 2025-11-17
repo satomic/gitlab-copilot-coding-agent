@@ -7,7 +7,7 @@ source "${SCRIPT_DIR}/common.sh"
 
 cd "${REPO_ROOT}"
 
-require_env GITLAB_ACCESS_TOKEN
+require_env GITLAB_TOKEN
 require_env TARGET_PROJECT_ID
 require_env TARGET_ISSUE_IID
 require_env NEW_MR_IID
@@ -31,7 +31,7 @@ fi
 CURL_ARGS=(
   --silent --show-error --fail
   --request PUT
-  --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}"
+  --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}"
   --data-urlencode description@updated_description.txt
 )
 
@@ -43,6 +43,6 @@ curl "${CURL_ARGS[@]}" "${API}/merge_requests/${NEW_MR_IID}"
 
 curl --silent --show-error --fail \
   --request POST \
-  --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+  --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   --data-urlencode "body=自动化任务完成，最新 TODO 已同步到 MR: ${NEW_MR_URL}" \
   "${API}/issues/${TARGET_ISSUE_IID}/notes"

@@ -7,14 +7,14 @@ source "${SCRIPT_DIR}/common.sh"
 
 cd "${REPO_ROOT}"
 
-require_env GITLAB_ACCESS_TOKEN
+require_env GITLAB_TOKEN
 require_env TARGET_PROJECT_ID
 require_env TARGET_BRANCH
 require_env NEW_BRANCH_NAME
 
 API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
 
-curl --silent --show-error --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+curl --silent --show-error --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   --data "branch=${NEW_BRANCH_NAME}" \
   --data "ref=${TARGET_BRANCH}" \
   --request POST "${API}/repository/branches" || echo "Branch may already exist"
@@ -29,7 +29,7 @@ EOF
 MR_TITLE="Auto MR for issue #${TARGET_ISSUE_IID:-unknown}"
 
 curl --silent --show-error --fail \
-  --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+  --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   --data-urlencode "source_branch=${NEW_BRANCH_NAME}" \
   --data-urlencode "target_branch=${TARGET_BRANCH}" \
   --data-urlencode "title=${MR_TITLE}" \
