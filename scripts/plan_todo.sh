@@ -31,7 +31,8 @@ Issue Context:
 Issue Description:
 ${ORIGINAL_NEEDS}
 
-Your output must be valid JSON with exactly two keys:
+CRITICAL: You must write your response directly to a file named 'plan.json' in the current directory.
+Use the file writing capability to create this file with valid JSON containing exactly two keys:
 1. \"branch\": A kebab-case branch name (e.g., issue-${TARGET_ISSUE_IID}-add-login-feature)
 2. \"todo_markdown\": A Markdown checklist with actionable tasks using - [ ] format
 
@@ -42,21 +43,17 @@ Requirements for the plan:
 - Keep tasks focused and atomic
 - Use clear, imperative language
 
-Example output format:
+Example JSON structure to write to plan.json:
 {
-  \"branch\": \"issue-1-implement-feature\",
+  \"branch\": \"issue-${TARGET_ISSUE_IID}-implement-feature\",
   \"todo_markdown\": \"- [ ] Create auth module\\n- [ ] Add unit tests\\n- [ ] Update documentation\"
 }
 
-Return ONLY the JSON, no additional commentary."
+Write the JSON file now. Do not output anything else."
 
-echo "[INFO] Invoking Copilot with prompt (timeout: 3600s)..."
-if timeout 3600 copilot -p "$PLAN_PROMPT" > plan_raw.txt 2>&1; then
+echo "[INFO] Invoking Copilot to generate plan.json (timeout: 3600s)..."
+if timeout 3600 copilot -p "$PLAN_PROMPT" --allow-all-tools > copilot_output.log 2>&1; then
   echo "[INFO] Copilot execution completed"
-  # Clean ANSI escape sequences and carriage returns
-  sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' plan_raw.txt | tr -d '\r' > plan_clean.txt
-  mv plan_clean.txt plan_raw.txt
-  echo "[INFO] Raw output: $(cat plan_raw.txt)"
 else
   EXIT_CODE=$?
   if [ $EXIT_CODE -eq 124 ]; then
@@ -64,37 +61,53 @@ else
   else
     echo "[ERROR] Copilot failed with exit code ${EXIT_CODE}" >&2
   fi
-  echo "Raw output: $(cat plan_raw.txt 2>/dev/null || echo 'none')" >&2
+  cat copilot_output.log >&2
   exit 1
 fi
 
-echo "[INFO] Parsing Copilot response..."
+echo "[INFO] Checking for plan.json..."
+if [ ! -f plan.json ]; then
+  echo "[ERROR] plan.json not found. Copilot did not create the expected file." >&2
+  echo "Copilot output:" >&2
+  cat copilot_output.log >&2
+  exit 1
+fi
+
+echo "[INFO] Parsing plan.json..."
+echo "[INFO] Contents of plan.json:"
+cat plan.json
 python3 <<'PY'
 import json
-import re
 from pathlib import Path
 
-raw = Path("plan_raw.txt").read_text(encoding="utf-8").strip()
-if raw.startswith("```"):
-    raw = re.sub(r"^```[a-zA-Z]*\n", "", raw)
-    raw = raw.rsplit("```", 1)[0]
-
-data = json.loads(raw)
-branch = data.get("branch", "").strip()
-todo = data.get("todo_markdown", "").strip()
-
-if not branch:
-    raise SystemExit("Copilot response missing branch")
-if not todo:
-    raise SystemExit("Copilot response missing todo_markdown")
-
-if not todo.endswith("\n"):
-    todo += "\n"
-Path("todo.md").write_text(todo, encoding="utf-8")
-
-with open("plan.env", "w", encoding="utf-8") as env_file:
-    env_file.write(f"NEW_BRANCH_NAME={branch}\n")
-    env_file.write("TODO_FILE=todo.md\n")
+try:
+    plan_file = Path("plan.json")
+    data = json.loads(plan_file.read_text(encoding="utf-8"))
+    
+    branch = data.get("branch", "").strip()
+    todo = data.get("todo_markdown", "").strip()
+    
+    if not branch:
+        raise SystemExit("plan.json missing 'branch' field")
+    if not todo:
+        raise SystemExit("plan.json missing 'todo_markdown' field")
+    
+    if not todo.endswith("\n"):
+        todo += "\n"
+    Path("todo.md").write_text(todo, encoding="utf-8")
+    
+    with open("plan.env", "w", encoding="utf-8") as env_file:
+        env_file.write(f"NEW_BRANCH_NAME={branch}\n")
+        env_file.write("TODO_FILE=todo.md\n")
+    
+    # Delete the JSON file after successful parsing
+    plan_file.unlink()
+    print("[INFO] plan.json parsed and deleted successfully")
+    
+except json.JSONDecodeError as e:
+    raise SystemExit(f"Invalid JSON in plan.json: {e}")
+except Exception as e:
+    raise SystemExit(f"Error processing plan.json: {e}")
 PY
 
 echo "[INFO] Plan generated successfully"
