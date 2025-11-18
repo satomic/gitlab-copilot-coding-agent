@@ -79,6 +79,7 @@ Requirements:
 - Follow existing code style and patterns
 - Include necessary imports and dependencies
 - Add inline comments for complex logic
+- Check if there is an appropriate .gitignore file; if not, create one based on the current technology stack. If it already exists, update it to match the technology stack and ensure it includes these automation files: patch_raw.txt, todo.md, plan.json
 
 Output format:
 \`\`\`diff
@@ -133,7 +134,7 @@ echo "[DEBUG] Listing untracked files..."
 git ls-files --others --exclude-standard || true
 
 # Exclude intermediate files from being tracked
-UNTRACKED_FILES=$(git ls-files --others --exclude-standard | grep -v -E '(patch_raw\.txt|copilot\.patch|todo\.md|todo_completed\.md|__pycache__|\.pyc$)' || true)
+UNTRACKED_FILES=$(git ls-files --others --exclude-standard | grep -v -E '(patch_raw\.txt|copilot\.patch|todo\.md|todo_completed\.md|plan\.json|__pycache__|\.pyc$)' || true)
 
 echo "[DEBUG] Untracked files to be added: ${UNTRACKED_FILES:-<none>}"
 
