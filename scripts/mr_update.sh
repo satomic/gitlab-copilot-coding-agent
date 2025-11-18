@@ -302,7 +302,7 @@ ${CHANGE_SUMMARY}
     COMPLETION_BODY="${COMPLETION_BODY}
 
 ---
-- [🔗 View Pipeline](${CI_PIPELINE_URL})"
+- [🔗 Copilot Coding Session](${CI_PIPELINE_URL})"
   fi
   
   if ! curl --silent --show-error --fail \
@@ -328,7 +328,7 @@ else
     NO_CHANGE_BODY="${NO_CHANGE_BODY}
 
 ---
-- [🔗 View Pipeline](${CI_PIPELINE_URL})"
+- [🔗 Copilot Coding Session](${CI_PIPELINE_URL})"
   fi
   
   if ! curl --silent --show-error --fail \
