@@ -22,9 +22,21 @@ else
 fi
 
 TODO_BODY="$(cat todo_completed.md)"
-cat <<EOF > updated_description.txt
-## TODO
+
+# Build updated MR description preserving pipeline and issue links
+MR_DESC="## TODO
 ${TODO_BODY}
+
+---
+**Original issue:** ${ISSUE_URL:-unknown}"
+
+if [ -n "${CI_PIPELINE_URL:-}" ]; then
+  MR_DESC="${MR_DESC}
+**Copilot CI Pipeline:** ${CI_PIPELINE_URL}"
+fi
+
+cat <<EOF > updated_description.txt
+${MR_DESC}
 EOF
 
 echo "[INFO] Updating MR ${NEW_MR_IID} description..."
@@ -56,7 +68,7 @@ echo "[INFO] Posting completion comment to issue ${TARGET_ISSUE_IID}..."
 if ! curl --silent --show-error --fail \
   --request POST \
   --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-  --data-urlencode "body=🤖 Automation task completed, the latest TODO has been synced to MR: ${NEW_MR_URL} 👈" \
+  --data-urlencode "body=🤖 Copilot Coding completed, the latest TODO has been synced to MR: ${NEW_MR_URL} 👈" \
   "${API}/issues/${TARGET_ISSUE_IID}/notes" > /dev/null; then
   echo "[ERROR] Failed to post issue comment" >&2
   exit 1

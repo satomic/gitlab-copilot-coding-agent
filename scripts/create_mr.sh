@@ -27,13 +27,24 @@ else
 fi
 
 TODO_BODY="$(cat todo.md)"
-cat <<EOF > mr_description.txt
-## TODO
+
+# Build MR description with pipeline link
+MR_DESC="## TODO
 ${TODO_BODY}
-Original issue: ${ISSUE_URL:-unknown}
+
+---
+**Original issue:** ${ISSUE_URL:-unknown}"
+
+if [ -n "${CI_PIPELINE_URL:-}" ]; then
+  MR_DESC="${MR_DESC}
+**🚀 Copilot Coding Session:** ${CI_PIPELINE_URL}"
+fi
+
+cat <<EOF > mr_description.txt
+${MR_DESC}
 EOF
 
-MR_TITLE="Auto MR for issue #${TARGET_ISSUE_IID:-unknown}"
+MR_TITLE="Copilot Generated MR for issue #${TARGET_ISSUE_IID:-unknown}"
 
 echo "[INFO] Creating merge request: ${MR_TITLE}..."
 if ! curl --silent --show-error --fail \

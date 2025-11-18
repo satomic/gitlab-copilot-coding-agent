@@ -13,7 +13,12 @@ require_env TARGET_ISSUE_IID
 
 echo "[INFO] Posting acknowledgment to issue ${TARGET_ISSUE_IID}..."
 
-NOTE_BODY="👀 Acknowledged: CI task 🚀 started at $(date -Iseconds)."
+# Build the note body with pipeline link if available
+NOTE_BODY="👀 Got it! Copilot Coding task 🚀 started at $(date -Iseconds)."
+
+if [ -n "${CI_PIPELINE_URL:-}" ]; then
+  NOTE_BODY="${NOTE_BODY}\n\n🔗 [View Pipeline Progress](${CI_PIPELINE_URL})"
+fi
 
 if ! curl --fail --silent --show-error \
   --request POST \
