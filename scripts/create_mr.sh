@@ -33,11 +33,11 @@ MR_DESC="## TODO
 ${TODO_BODY}
 
 ---
-- Original issue:** ${ISSUE_URL:-unknown}"
+- Original issue: ${ISSUE_URL:-unknown}"
 
 if [ -n "${CI_PIPELINE_URL:-}" ]; then
   MR_DESC="${MR_DESC}
--🔗 [Copilot Coding Session](${CI_PIPELINE_URL})"
+- [🔗 Copilot Coding Session](${CI_PIPELINE_URL})"
 fi
 
 cat <<EOF > mr_description.txt

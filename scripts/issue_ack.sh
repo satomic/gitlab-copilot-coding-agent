@@ -18,8 +18,9 @@ NOTE_BODY="👀 Got it! Copilot Coding task 🚀 started at $(date -Iseconds)."
 
 if [ -n "${CI_PIPELINE_URL:-}" ]; then
   NOTE_BODY="${NOTE_BODY}
+
 ---
--🔗 [Copilot Coding Session](${CI_PIPELINE_URL})"
+- [🔗 Copilot Coding Session](${CI_PIPELINE_URL})"
 fi
 
 if ! curl --fail --silent --show-error \
