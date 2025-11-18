@@ -23,6 +23,30 @@ fi
 echo "[INFO] Processing MR note request..."
 echo "[INFO] Instruction: ${MR_NOTE_INSTRUCTION}"
 
+# Post acknowledgment comment to MR
+echo "[INFO] Posting acknowledgment to MR ${TARGET_MR_IID}..."
+
+NOTE_BODY="👀 Got it! Copilot Coding task 🚀 started at $(date -Iseconds)."
+
+if [ -n "${CI_PIPELINE_URL:-}" ]; then
+  NOTE_BODY="${NOTE_BODY}
+
+---
+- [🔗 Copilot Coding Session](${CI_PIPELINE_URL})"
+fi
+
+API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
+
+if ! curl --fail --silent --show-error \
+  --request POST \
+  --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+  --data-urlencode "body=${NOTE_BODY}" \
+  "${API}/merge_requests/${TARGET_MR_IID}/notes" > /dev/null; then
+  echo "[WARN] Failed to post acknowledgment comment" >&2
+fi
+
+echo "[INFO] Acknowledgment posted successfully"
+
 python3 <<'PY' > authed_repo_url.txt
 import os
 from urllib.parse import quote, urlparse, urlunparse
@@ -83,7 +107,7 @@ Requirements:
 - Follow existing code style and patterns
 - Include necessary imports and dependencies
 - Add inline comments for complex logic
-- Check if there is an appropriate .gitignore file; if not, create one based on the current technology stack. If it already exists, update it to match the technology stack and ensure it includes these automation files: patch_raw.txt, todo.md, plan.json, commit_msg.txt
+- Check if there is an appropriate .gitignore file; if not, create one based on the current technology stack. If it already exists, update it to match the technology stack and ensure it includes these automation files: patch_raw.txt, todo.md, plan.json, commit_msg.txt, mr_summary.txt
 
 Output format:
 \`\`\`diff
@@ -137,7 +161,7 @@ echo "[DEBUG] Listing untracked files..."
 git ls-files --others --exclude-standard || true
 
 # Exclude intermediate files from being tracked
-UNTRACKED_FILES=$(git ls-files --others --exclude-standard | grep -v -E '(patch_raw\.txt|copilot\.patch|todo\.md|todo_completed\.md|plan\.json|commit_msg\.txt|commit_msg_raw\.txt|__pycache__|\.pyc$)' || true)
+UNTRACKED_FILES=$(git ls-files --others --exclude-standard | grep -v -E '(patch_raw\.txt|copilot\.patch|todo\.md|todo_completed\.md|plan\.json|commit_msg\.txt|commit_msg_raw\.txt|mr_summary\.txt|__pycache__|\.pyc$)' || true)
 
 echo "[DEBUG] Untracked files to be added: ${UNTRACKED_FILES:-<none>}"
 
@@ -237,14 +261,54 @@ Generate the commit message now."
     exit 1
   fi
   
-  # Post comment to MR
+  # Generate summary of changes
+  echo "[INFO] Generating summary of changes..."
+  
+  SUMMARY_PROMPT="Generate a concise summary of the code changes that were made.
+  
+Changes:
+$(git log --oneline -1)
+$(git diff HEAD~1 --stat)
+
+Requirements:
+- Start with a brief one-line summary
+- List key changes as bullet points
+- Be clear and professional
+- Output ONLY the summary, no extra context
+- Write the summary to a file named 'mr_summary.txt'
+
+Generate the summary now."
+
+  timeout 60 copilot -p "$SUMMARY_PROMPT" --allow-all-tools 2>&1 || true
+  
+  # Read the summary
+  if [ -f mr_summary.txt ]; then
+    CHANGE_SUMMARY=$(cat mr_summary.txt)
+  else
+    CHANGE_SUMMARY="Applied requested changes: ${MR_NOTE_INSTRUCTION}"
+  fi
+  
+  # Post completion comment to MR with summary
   echo "[INFO] Posting completion comment to MR ${TARGET_MR_IID}..."
-  API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
+  
+  COMPLETION_BODY="🤖 Copilot Coding completed! ✅
+
+**Changes Applied:**
+${CHANGE_SUMMARY}
+
+**Commit:** \`${COMMIT_MSG}\`"
+
+  if [ -n "${CI_PIPELINE_URL:-}" ]; then
+    COMPLETION_BODY="${COMPLETION_BODY}
+
+---
+- [🔗 View Pipeline](${CI_PIPELINE_URL})"
+  fi
   
   if ! curl --silent --show-error --fail \
     --request POST \
     --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    --data-urlencode "body=🤖 Copilot has applied your requested changes. Commit: ${COMMIT_MSG}" \
+    --data-urlencode "body=${COMPLETION_BODY}" \
     "${API}/merge_requests/${TARGET_MR_IID}/notes" > /dev/null; then
     echo "[WARN] Failed to post MR comment" >&2
   fi
@@ -255,12 +319,22 @@ else
   
   # Post comment about no changes
   echo "[INFO] Posting no-changes comment to MR ${TARGET_MR_IID}..."
-  API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
+  
+  NO_CHANGE_BODY="🤖 Copilot analyzed your request but determined no changes are needed.
+
+**Request:** ${MR_NOTE_INSTRUCTION}"
+
+  if [ -n "${CI_PIPELINE_URL:-}" ]; then
+    NO_CHANGE_BODY="${NO_CHANGE_BODY}
+
+---
+- [🔗 View Pipeline](${CI_PIPELINE_URL})"
+  fi
   
   if ! curl --silent --show-error --fail \
     --request POST \
     --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    --data-urlencode "body=🤖 Copilot analyzed your request but determined no changes are needed." \
+    --data-urlencode "body=${NO_CHANGE_BODY}" \
     "${API}/merge_requests/${TARGET_MR_IID}/notes" > /dev/null; then
     echo "[WARN] Failed to post MR comment" >&2
   fi
