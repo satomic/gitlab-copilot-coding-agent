@@ -89,6 +89,7 @@ if timeout 3600 copilot -p "$IMPL_PROMPT" --allow-all-tools > patch_raw.txt 2>&1
   # Clean ANSI escape sequences and carriage returns
   sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' patch_raw.txt | tr -d '\r' > patch_clean.txt
   mv patch_clean.txt patch_raw.txt
+  echo "[INFO] Raw output: $(cat patch_raw.txt)"
 else
   EXIT_CODE=$?
   if [ $EXIT_CODE -eq 124 ]; then
