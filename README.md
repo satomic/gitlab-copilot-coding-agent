@@ -1,4 +1,4 @@
-# Copilot Coding Agent with GitLab CI/CD
+# Copilot Coding Agent for GitLab
 
 [中文](./README_CN.md) | English
 

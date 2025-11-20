@@ -1,4 +1,4 @@
-# Copilot 代码智能体（基于 GitLab CI/CD）
+# Copilot Coding Agent for GitLab
 
 中文 | [English](./README.md)
 
