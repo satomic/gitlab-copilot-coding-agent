@@ -94,6 +94,8 @@ class Settings:
         self.webhook_secret_token = os.getenv("WEBHOOK_SECRET_TOKEN")
         self.default_target_branch = os.getenv("FALLBACK_TARGET_BRANCH", "main")
         self.original_needs_max_chars = int(os.getenv("ORIGINAL_NEEDS_MAX_CHARS", "8192"))
+        self.copilot_agent_username = os.getenv("COPILOT_AGENT_USERNAME", "copilot-agent")
+        self.copilot_agent_commit_email = os.getenv("COPILOT_AGENT_COMMIT_EMAIL", "copilot@github.com")
 
     @staticmethod
     def _require(name: str) -> str:
@@ -131,9 +133,10 @@ def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
     note_attrs = payload.get("object_attributes") or {}
     note_text = note_attrs.get("note", "")
     
-    # Check if @copilot-agent is mentioned
-    if "@copilot-agent" not in note_text:
-        raise ValueError("@copilot-agent not mentioned in note")
+    # Check if copilot agent is mentioned
+    agent_mention = f"@{settings.copilot_agent_username}"
+    if agent_mention not in note_text:
+        raise ValueError(f"{agent_mention} not mentioned in note")
     
     mr = payload.get("merge_request") or {}
     project = payload.get("project") or {}
@@ -153,8 +156,9 @@ def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
     target_project_id = project.get("id") or mr.get("target_project_id")
     target_project_path = project.get("path_with_namespace", "")
     
-    # Extract instruction from note (remove @copilot-agent prefix)
-    instruction = note_text.replace("@copilot-agent", "").strip()
+    # Extract instruction from note (remove agent mention prefix)
+    agent_mention = f"@{settings.copilot_agent_username}"
+    instruction = note_text.replace(agent_mention, "").strip()
     
     variables = {
         "TRIGGER_TYPE": "mr_note",
@@ -172,6 +176,8 @@ def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         "MR_AUTHOR_ID": str(mr.get("author_id", "")),
         "NOTE_AUTHOR_ID": str(user.get("id", "")),
         "NOTE_AUTHOR_USERNAME": user.get("username", ""),
+        "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
+        "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
     }
     
     missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "SOURCE_BRANCH", "TARGET_MR_IID") if not variables.get(k)]
@@ -212,16 +218,16 @@ def _extract_variables(payload: Dict[str, Any]) -> Dict[str, str]:
     
     is_copilot_assigned = False
     if current_assignees and len(current_assignees) > 0:
-        first_assignee_name = current_assignees[0].get("name", "")
-        if first_assignee_name == "Copilot":
+        first_assignee_name = current_assignees[0].get("username", "")
+        if first_assignee_name == settings.copilot_agent_username:
             is_copilot_assigned = True
-            logger.info("Copilot assigned detected, will trigger pipeline")
+            logger.info("%s assigned detected, will trigger pipeline", settings.copilot_agent_username)
         else:
-            logger.debug("First assignee is '%s', not 'Copilot'", first_assignee_name)
+            logger.debug("First assignee is '%s', not '%s'", first_assignee_name, settings.copilot_agent_username)
     
     if not is_copilot_assigned:
-        logger.info("Copilot not assigned in changes, skipping pipeline trigger")
-        raise ValueError("Copilot not assigned, ignoring event")
+        logger.info("%s not assigned in changes, skipping pipeline trigger", settings.copilot_agent_username)
+        raise ValueError(f"{settings.copilot_agent_username} not assigned, ignoring event")
 
     original_needs = issue.get("description") or ""
     if len(original_needs) > settings.original_needs_max_chars:
@@ -261,6 +267,8 @@ def _extract_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         "ISSUE_ACTION": issue.get("action", ""),
         "ISSUE_STATE": issue.get("state", ""),
         "ISSUE_UPDATED_AT": issue.get("updated_at", ""),
+        "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
+        "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
     }
 
     missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "TARGET_ISSUE_IID") if not variables.get(k)]

@@ -135,8 +135,11 @@ fi
 
 echo "[INFO] Copilot execution completed, checking for changes..."
 
-git config user.name "Copilot"
-git config user.email "copilot@github.com"
+GIT_USER_NAME="${COPILOT_AGENT_USERNAME:-Copilot}"
+GIT_USER_EMAIL="${COPILOT_AGENT_COMMIT_EMAIL:-copilot@github.com}"
+
+git config user.name "${GIT_USER_NAME}"
+git config user.email "${GIT_USER_EMAIL}"
 
 echo "[DEBUG] Current git status:"
 git status

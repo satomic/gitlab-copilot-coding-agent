@@ -131,6 +131,8 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    PIPELINE_REF=main
    GITLAB_API_BASE=https://gitlab.com # 根据需要更改为自托管实例
    WEBHOOK_SECRET_TOKEN=
+   COPILOT_AGENT_USERNAME=copilot-agent # Copilot 机器人的 GitLab 用户名
+   COPILOT_AGENT_COMMIT_EMAIL=copilot@github.com # git 提交使用的邮箱
    LISTEN_HOST=0.0.0.0
    LISTEN_PORT=8080
    EOF

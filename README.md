@@ -131,6 +131,8 @@ Post Summary Comment
    PIPELINE_REF=main
    GITLAB_API_BASE=https://gitlab.com # Change to self-hosted instance if needed
    WEBHOOK_SECRET_TOKEN=
+   COPILOT_AGENT_USERNAME=copilot-agent # GitLab username of the Copilot bot
+   COPILOT_AGENT_COMMIT_EMAIL=copilot@github.com # Email for git commits
    LISTEN_HOST=0.0.0.0
    LISTEN_PORT=8080
    EOF
