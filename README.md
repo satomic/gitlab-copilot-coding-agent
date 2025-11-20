@@ -127,6 +127,9 @@ Post Summary Comment
 
    ![#cicd-variables](images/cicd-variables.png)
 
+   Remember to change the role that can use pipeline variables to Developer
+   ![#ppl-variables-permission](images/ppl-variables-permission.png)
+
 3. **Setup GitLab Runner**
    > If your GitLab instance already has available Runners with Docker/Kubernetes executors, you can skip this step.
 

@@ -128,6 +128,9 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
   
    ![#cicd-variables](images/cicd-variables.png)
 
+   记住，要把使用pipeline variables的角色修改一下，改为Developer
+   ![#ppl-variables-permission](images/ppl-variables-permission.png)
+
 3. **设置 GitLab Runner**
    > 如果你的 GitLab 实例已经有可用的执行器为Docker/Kubernetes的Runner，可以跳过此步骤。
    
