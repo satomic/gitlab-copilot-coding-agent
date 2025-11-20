@@ -1,34 +1,26 @@
-# Environment configuration
-.env
-*.env.local
-.env.*
-!.env.example
-
-# Python cache and build output
-__pycache__/
+# Python cache and build
+__pycache__
 *.py[cod]
 *.pyo
 *.pyd
 *.so
 .mypy_cache/
 .pytest_cache/
-.cache/
 *.egg-info/
-dist/
-build/
 
 # Virtual environments
 .venv/
 venv/
 env/
-ENV/
 
-# Editor and tooling noise
-.idea/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
+# Environment configuration
+.env
+*.env.local
+
+# Runtime data
+logs/
+hooks/
+tmp/
 
 # Copilot automation artifacts
 repo-b/
@@ -46,8 +38,8 @@ mr.json
 mr_description.txt
 updated_description.txt
 
-# Runtime logs and captured webhooks
-logs/
-hooks/
+# Editor
+.idea/
 .vscode/
-tmp/
+*.swp
+.DS_Store
