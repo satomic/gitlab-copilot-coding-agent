@@ -49,8 +49,16 @@ mr_review:
   image: satomic/copilot-cli:latest
   script:
     - copilot --version
-    - bash scripts/mr_review.sh
+    - |
+      if [ "${ENABLE_INLINE_REVIEW_COMMENTS:-false}" = "true" ]; then
+        echo "[INFO] Using inline comments mode"
+        bash scripts/mr_review_with_inline_comments.sh
+      else
+        echo "[INFO] Using general comments mode"
+        bash scripts/mr_review.sh
+      fi
   artifacts:
     paths:
       - repo-b/review_raw.txt
       - repo-b/review_summary.txt
+      - repo-b/review_findings.json
