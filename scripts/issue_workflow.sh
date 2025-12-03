@@ -196,7 +196,11 @@ cat <<EOF > mr_description.txt
 ${MR_DESC}
 EOF
 
-MR_TITLE="Copilot Generated MR for issue #${TARGET_ISSUE_IID:-unknown}"
+# Use the actual issue title as MR title, with issue reference
+MR_TITLE="${ISSUE_TITLE}"
+if [ -n "${TARGET_ISSUE_IID:-}" ]; then
+  MR_TITLE="${MR_TITLE} (#${TARGET_ISSUE_IID})"
+fi
 
 echo "[INFO] Creating merge request: ${MR_TITLE}..."
 if ! curl --silent --show-error --fail \

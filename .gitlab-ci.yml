@@ -17,6 +17,7 @@ issue_workflow:
     - if: $TRIGGER_TYPE == "issue_assignee"
   image: satomic/copilot-cli:latest
   script:
+    - copilot --version
     - bash scripts/issue_workflow.sh
   artifacts:
     paths:
@@ -34,6 +35,7 @@ mr_update:
     - if: $TRIGGER_TYPE == "mr_note"
   image: satomic/copilot-cli:latest
   script:
+    - copilot --version
     - bash scripts/mr_update.sh
   artifacts:
     paths:
@@ -46,6 +48,7 @@ mr_review:
     - if: $TRIGGER_TYPE == "mr_reviewer"
   image: satomic/copilot-cli:latest
   script:
+    - copilot --version
     - bash scripts/mr_review.sh
   artifacts:
     paths:
