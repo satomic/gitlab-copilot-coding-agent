@@ -8,72 +8,24 @@ workflow:
     - when: never
 
 stages:
-  - prepare
-  - plan
   - implement
-  - finalize
 
-# Job for issue assignee workflow
-issue_ack:
-  stage: prepare
-  rules:
-    - if: $TRIGGER_TYPE == "issue_assignee"
-  script:
-    - bash scripts/issue_ack.sh
-
-plan_todo:
-  stage: plan
-  rules:
-    - if: $TRIGGER_TYPE == "issue_assignee"
-  needs: [issue_ack]
-  image: satomic/copilot-cli:latest
-  script:
-    - bash scripts/plan_todo.sh
-  artifacts:
-    paths:
-      - todo.md
-      - plan_raw.txt
-    reports:
-      dotenv: plan.env
-
-create_mr:
-  stage: plan
-  rules:
-    - if: $TRIGGER_TYPE == "issue_assignee"
-  needs: [plan_todo]
-  script:
-    - bash scripts/create_mr.sh
-  artifacts:
-    paths:
-      - mr.json
-    reports:
-      dotenv: mr.env
-
-implement_tasks:
+# Job for issue assignee workflow (optimized single job)
+issue_workflow:
   stage: implement
   rules:
     - if: $TRIGGER_TYPE == "issue_assignee"
-  needs:
-    - plan_todo
-    - create_mr
   image: satomic/copilot-cli:latest
   script:
-    - bash scripts/implement_tasks.sh
+    - bash scripts/issue_workflow.sh
   artifacts:
     paths:
+      - todo.md
+      - todo_completed.md
+      - mr.json
       - repo-b/todo_completed.md
       - repo-b/patch_raw.txt
       - repo-b/copilot.patch
-
-finalize:
-  stage: finalize
-  rules:
-    - if: $TRIGGER_TYPE == "issue_assignee"
-  needs:
-    - create_mr
-    - implement_tasks
-  script:
-    - bash scripts/finalize.sh
 
 # Job for MR note workflow
 mr_update:
