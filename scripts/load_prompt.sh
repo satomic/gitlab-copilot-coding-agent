@@ -20,7 +20,7 @@ validate_language() {
 }
 
 # Load a prompt template and replace variables
-# Usage: load_prompt <template_name> <variables_as_env_or_args>
+# Usage: load_prompt <template_name> <variables_as_args>
 load_prompt() {
     local template_name="$1"
     shift
@@ -33,36 +33,50 @@ load_prompt() {
         return 1
     fi
 
-    # Read template content
-    local content=$(cat "${template_file}")
+    # Convert Git Bash path to Windows path for Python (if on Windows)
+    local python_template_file="${template_file}"
+    if [[ "${template_file}" =~ ^/([a-z])/ ]]; then
+        # Convert /c/path to C:/path for Python
+        python_template_file=$(echo "${template_file}" | sed -E 's|^/([a-z])/|\U\1:/|')
+    fi
 
-    # Replace variables in format {var_name}
-    # Variables can be passed as arguments (var=value) or from environment
+    # Export all variable arguments as environment variables for Python
     for arg in "$@"; do
         if [[ "$arg" =~ ^([^=]+)=(.*)$ ]]; then
-            local var_name="${BASH_REMATCH[1]}"
-            local var_value="${BASH_REMATCH[2]}"
-            # Escape special characters for sed
-            var_value=$(echo "$var_value" | sed 's/[&/\]/\\&/g')
-            content=$(echo "$content" | sed "s|{${var_name}}|${var_value}|g")
+            export "PROMPT_VAR_${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
         fi
     done
 
-    # Also replace from environment variables
-    # This allows both explicit passing and environment variable usage
-    while IFS= read -r line; do
-        if [[ "$line" =~ \{([^}]+)\} ]]; then
-            local var_name="${BASH_REMATCH[1]}"
-            if [ -n "${!var_name:-}" ]; then
-                local var_value="${!var_name}"
-                # Escape special characters for sed
-                var_value=$(echo "$var_value" | sed 's/[&/\]/\\&/g')
-                content=$(echo "$content" | sed "s|{${var_name}}|${var_value}|g")
-            fi
-        fi
-    done <<< "$content"
+    # Use Python for safe variable replacement
+    python3 -c '
+import sys
+import os
+import io
 
-    echo "$content"
+# Ensure stdout uses UTF-8 encoding
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+
+# Read template
+with open(r"'"${python_template_file}"'", "r", encoding="utf-8") as f:
+    content = f.read()
+
+# Get all PROMPT_VAR_ environment variables
+for key, value in os.environ.items():
+    if key.startswith("PROMPT_VAR_"):
+        var_name = key[11:].lower()  # Remove PROMPT_VAR_ prefix and convert to lowercase
+        placeholder = "{" + var_name + "}"
+        content = content.replace(placeholder, value)
+
+print(content, end="")
+'
+
+    # Clean up exported variables
+    for arg in "$@"; do
+        if [[ "$arg" =~ ^([^=]+)=(.*)$ ]]; then
+            unset "PROMPT_VAR_${BASH_REMATCH[1]}"
+        fi
+    done
 }
 
 # Export the function for use in subshells

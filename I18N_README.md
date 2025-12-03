@@ -153,13 +153,19 @@ The loader automatically replaces these with actual values.
 - English (en) prompts
 - Chinese (zh) prompts
 - Japanese (ja) prompts
-- Prompt loader utility
+- Prompt loader utility with safe variable handling
 - Webhook service configuration
 - Environment variable support
+- Full integration in all workflow scripts:
+  - issue_workflow.sh
+  - mr_update.sh
+  - mr_review.sh
+  - mr_review_with_inline_comments.sh
+- Windows/Linux cross-platform path handling
+- UTF-8 encoding support for emoji and special characters
 
 ### Pending 🔄
-- Full integration in all workflow scripts
-- Documentation updates in README
+- Documentation updates in main README files
 - UI messages localization (optional)
 
 ## Examples
@@ -196,7 +202,10 @@ The loader automatically replaces these with actual values.
 **Solution**: Ensure all required templates exist in the language directory
 
 ### Issue: Variables not replaced
-**Solution**: Check variable names match exactly (case-sensitive)
+**Solution**: Variable names in templates use lowercase (e.g., `{timestamp}`). The loader automatically handles case conversion.
+
+### Issue: Special characters in variables
+**Solution**: The loader uses Python for safe variable substitution, which handles special characters, newlines, and emojis correctly.
 
 ## Future Enhancements
 
