@@ -21,6 +21,7 @@ Setup：
 - Issue: [一个 webhook 接收器应用](https://gitlab.com/agentic-devops/app-repo-01/-/issues/9)
 - MR: [针对 issue #9 的 Copilot 生成 MR](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/13)
 - 使用评论更新 MR: [@copilot-agent 将 readme 更改为韩语](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/15#note_2901129017)
+- 代码审查: [将 Copilot 指定为 MR Reviewer](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)
 
 
 

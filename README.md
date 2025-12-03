@@ -19,6 +19,7 @@ How to use:
 - Issue: [a webhook receiver app](https://gitlab.com/agentic-devops/app-repo-01/-/issues/9)
 - MR: [Copilot Generated MR for issue #9](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/13)
 - Update MR with comment: [@copilot-agent change reamdme to Korean](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/15#note_2901129017)
+- Code Review: [Assign Copilot as MR Reviewer](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)
 
 ## 🏗️ Architecture
 
