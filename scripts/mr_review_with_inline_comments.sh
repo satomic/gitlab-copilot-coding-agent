@@ -36,7 +36,7 @@ if [ -n "${CI_PIPELINE_URL:-}" ]; then
 - [🔗 Review Session](${CI_PIPELINE_URL})"
 fi
 
-API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
+export API="${UPSTREAM_GITLAB_BASE_URL}/api/v4/projects/${TARGET_PROJECT_ID}"
 
 if ! curl --fail --silent --show-error \
   --request POST \
@@ -84,9 +84,9 @@ git checkout "${SOURCE_BRANCH}" >/dev/null 2>&1 || {
 }
 
 echo "[INFO] Getting commit SHAs for position info..."
-BASE_SHA=$(git rev-parse "origin/${TARGET_BRANCH}")
-HEAD_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}")
-START_SHA=$(git merge-base "origin/${TARGET_BRANCH}" "origin/${SOURCE_BRANCH}")
+export BASE_SHA=$(git rev-parse "origin/${TARGET_BRANCH}")
+export HEAD_SHA=$(git rev-parse "origin/${SOURCE_BRANCH}")
+export START_SHA=$(git merge-base "origin/${TARGET_BRANCH}" "origin/${SOURCE_BRANCH}")
 
 echo "[DEBUG] BASE_SHA=${BASE_SHA}"
 echo "[DEBUG] HEAD_SHA=${HEAD_SHA}"
