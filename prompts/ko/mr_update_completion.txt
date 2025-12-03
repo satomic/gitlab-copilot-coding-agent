@@ -1,9 +1,6 @@
-✅ 업데이트가 완료되었습니다! 🎉
+🤖 Copilot 코딩 완료! ✅
 
-**변경사항 요약:**
+**적용된 변경사항:**
 {change_summary}
 
-**Commit 메시지:**
-{commit_message}
-
-변경사항이 source 브랜치에 푸시되었습니다. 업데이트된 코드를 검토해 주세요!
+**커밋:** `{commit_message}`
