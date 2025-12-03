@@ -29,7 +29,8 @@ echo "[INFO] MR IID: ${TARGET_MR_IID}"
 # Post acknowledgment comment to MR
 echo "[INFO] Posting acknowledgment to MR ${TARGET_MR_IID}..."
 
-NOTE_BODY="👀 Starting code review! 🔍 Copilot is analyzing your changes at $(date -Iseconds)."
+# Load review acknowledgment message template
+NOTE_BODY=$(load_prompt "review_ack")
 
 if [ -n "${CI_PIPELINE_URL:-}" ]; then
   NOTE_BODY="${NOTE_BODY}
@@ -325,11 +326,10 @@ try:
 
         comment_body = f"""{emoji} **{severity.upper()}**: {title}
 
-**Category**: {category}
-
-**Issue**: {description}
-
-**Suggestion**: {suggestion}"""
+---
+- **Category**: {category}
+- **Issue**: {description}
+- **Suggestion**: {suggestion}"""
 
         success = post_inline_discussion(
             api_url, token, mr_iid,
@@ -349,16 +349,15 @@ try:
 
 **Overall Assessment**: {summary}
 
-**Recommendation**: **{recommendation}**
-
-**Review Statistics**:
-- 🔴 Critical: {sum(1 for f in findings if f.get('severity') == 'critical')}
-- 🟠 Major: {sum(1 for f in findings if f.get('severity') == 'major')}
-- 🟡 Minor: {sum(1 for f in findings if f.get('severity') == 'minor')}
-- 💡 Suggestions: {sum(1 for f in findings if f.get('severity') == 'suggestion')}
-
-**Total Issues Found**: {len(findings)}
-**Inline Comments Posted**: {inline_count}
+---
+- **Recommendation**: **{recommendation}**
+- **Review Statistics**:
+  - 🔴 Critical: {sum(1 for f in findings if f.get('severity') == 'critical')}
+  - 🟠 Major: {sum(1 for f in findings if f.get('severity') == 'major')}
+  - 🟡 Minor: {sum(1 for f in findings if f.get('severity') == 'minor')}
+  - 💡 Suggestions: {sum(1 for f in findings if f.get('severity') == 'suggestion')}
+- **Total Issues Found**: {len(findings)}
+- **Inline Comments Posted**: {inline_count}
 """
 
     # Add failed inlines to summary if any
@@ -377,6 +376,8 @@ try:
 
             summary_body += f"""
 {emoji} **{severity.upper()}**: {title}
+
+---
 - **File**: `{file_path}:{line}`
 - **Issue**: {description}
 - **Suggestion**: {suggestion}

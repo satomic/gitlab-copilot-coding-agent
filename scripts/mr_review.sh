@@ -29,7 +29,8 @@ echo "[INFO] MR IID: ${TARGET_MR_IID}"
 # Post acknowledgment comment to MR
 echo "[INFO] Posting acknowledgment to MR ${TARGET_MR_IID}..."
 
-NOTE_BODY="👀 Starting code review! 🔍 Copilot is analyzing your changes at $(date -Iseconds)."
+# Load review acknowledgment message template
+NOTE_BODY=$(load_prompt "review_ack")
 
 if [ -n "${CI_PIPELINE_URL:-}" ]; then
   NOTE_BODY="${NOTE_BODY}

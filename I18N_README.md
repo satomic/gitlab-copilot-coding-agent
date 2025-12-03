@@ -27,6 +27,7 @@ prompts/
 │   ├── mr_summary.txt
 │   ├── mr_update_completion.txt
 │   ├── mr_no_changes.txt
+│   ├── review_ack.txt
 │   └── code_review.txt
 ├── zh/               # Chinese prompts
 │   ├── issue_ack.txt
@@ -39,6 +40,7 @@ prompts/
 │   ├── mr_summary.txt
 │   ├── mr_update_completion.txt
 │   ├── mr_no_changes.txt
+│   ├── review_ack.txt
 │   └── code_review.txt
 └── ja/               # Japanese prompts
     ├── issue_ack.txt
@@ -51,6 +53,7 @@ prompts/
     ├── mr_summary.txt
     ├── mr_update_completion.txt
     ├── mr_no_changes.txt
+    ├── review_ack.txt
     └── code_review.txt
 ```
 
@@ -150,7 +153,12 @@ Create the following files in `prompts/<lang_code>/`:
     Variables: {user_instruction}
     ```
 
-11. **code_review.txt** - Code review prompt
+11. **review_ack.txt** - Code review acknowledgment message
+    ```
+    Variables: (none)
+    ```
+
+12. **code_review.txt** - Code review prompt
     ```
     Variables: {mr_title}, {mr_description}, {source_branch}, {target_branch},
                {changed_files}, {commit_messages}, {code_diff}
