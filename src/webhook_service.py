@@ -97,6 +97,7 @@ class Settings:
         self.copilot_agent_username = os.getenv("COPILOT_AGENT_USERNAME", "copilot-agent")
         self.copilot_agent_commit_email = os.getenv("COPILOT_AGENT_COMMIT_EMAIL", "copilot@github.com")
         self.enable_inline_review_comments = os.getenv("ENABLE_INLINE_REVIEW_COMMENTS", "true").lower() in {"true", "1", "yes", "on"}
+        self.copilot_language = os.getenv("COPILOT_LANGUAGE", "en")
 
     @staticmethod
     def _require(name: str) -> str:
@@ -179,6 +180,7 @@ def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         "NOTE_AUTHOR_USERNAME": user.get("username", ""),
         "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
         "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
+        "COPILOT_LANGUAGE": settings.copilot_language,
     }
 
     missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "SOURCE_BRANCH", "TARGET_MR_IID") if not variables.get(k)]
@@ -266,6 +268,7 @@ def _extract_mr_reviewer_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
         "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
         "ENABLE_INLINE_REVIEW_COMMENTS": "true" if settings.enable_inline_review_comments else "false",
+        "COPILOT_LANGUAGE": settings.copilot_language,
     }
 
     missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "SOURCE_BRANCH", "TARGET_MR_IID") if not variables.get(k)]
@@ -357,6 +360,7 @@ def _extract_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         "ISSUE_UPDATED_AT": issue.get("updated_at", ""),
         "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
         "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
+        "COPILOT_LANGUAGE": settings.copilot_language,
     }
 
     missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "TARGET_ISSUE_IID") if not variables.get(k)]

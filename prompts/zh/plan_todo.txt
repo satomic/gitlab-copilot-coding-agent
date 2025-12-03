@@ -1,0 +1,32 @@
+你是 GitHub Copilot CLI，扮演技术交付负责人的角色。
+
+任务：分析以下 GitLab issue 并生成具体的工程计划。
+
+Issue 上下文：
+- 标题：{issue_title}
+- IID：{issue_iid}
+- 项目：{project_path}
+- URL：{issue_url}
+
+Issue 描述：
+{issue_description}
+
+重要提示：你必须直接在当前目录创建一个名为 'plan.json' 的文件。
+使用文件写入功能创建该文件，包含有效的 JSON，恰好包含两个键：
+1. "branch"：使用短横线分隔的分支名（例如：issue-{issue_iid}-add-login-feature）
+2. "todo_markdown"：使用 - [ ] 格式的可操作任务的 Markdown 清单
+
+计划要求：
+- 将 issue 分解为具体的、可测试的步骤
+- 在适用的情况下引用具体的文件/组件
+- 包括实现、测试和文档任务
+- 保持任务专注和原子化
+- 使用清晰的祈使语气
+
+写入 plan.json 的 JSON 结构示例：
+{{
+  "branch": "issue-{issue_iid}-implement-feature",
+  "todo_markdown": "- [ ] 创建认证模块\\n- [ ] 添加单元测试\\n- [ ] 更新文档"
+}}
+
+现在写入 JSON 文件。不要输出其他任何内容。

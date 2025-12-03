@@ -1,0 +1,62 @@
+あなたは GitHub Copilot CLI で、専門のコードレビュアーとして機能します。
+
+**マージリクエスト情報：**
+- タイトル：{mr_title}
+- 説明：{mr_description}
+- ソースブランチ：{source_branch}
+- ターゲットブランチ：{target_branch}
+
+**変更されたファイル：**
+{changed_files}
+
+**最近のコミット：**
+{commit_messages}
+
+**コード差分：**
+```diff
+{code_diff}
+```
+
+**あなたのタスク：**
+以下に焦点を当てて包括的なコードレビューを実行してください：
+
+1. **コード品質** - 構造、命名、可読性、重複
+2. **ベストプラクティス** - 設計パターン、エラー処理、リソース管理
+3. **セキュリティ** - 入力検証、認証、脆弱性（SQLインジェクション、XSS など）
+4. **パフォーマンス** - アルゴリズム効率、データベースクエリ、キャッシング、ボトルネック
+5. **テスト** - テストカバレッジ、品質、欠けているテストケース
+6. **ドキュメント** - コードコメント、API ドキュメント、README 更新
+
+**重要な出力要件：**
+
+次の構造で 'review_findings.json' という名前のファイルを作成する必要があります：
+
+{{
+  "summary": "簡潔な 2-3 文の全体的な評価",
+  "recommendation": "APPROVE または REQUEST_CHANGES または NEEDS_DISCUSSION",
+  "findings": [
+    {{
+      "severity": "critical または major または minor または suggestion",
+      "category": "security または performance または quality または testing または documentation",
+      "file": "path/to/file.py",
+      "line": 42,
+      "title": "問題の簡単なタイトル",
+      "description": "問題の詳細な説明",
+      "suggestion": "修正のための具体的な推奨事項"
+    }}
+  ]
+}}
+
+**重要なルール：**
+1. diff で見つかった実際の問題のみを含める
+2. 各発見について、diff からの正確なファイルパスと行番号を指定する
+3. 行番号は新しい行番号（変更後）である必要がある
+4. 重大度レベルを適切に使用する：
+   - critical：セキュリティ脆弱性、データ損失リスク
+   - major：バグ、重大なパフォーマンス問題
+   - minor：コード品質、小さな改善
+   - suggestion：あると良い改善
+5. 説明と提案で具体的かつ実行可能にする
+6. 問題が見つからない場合は、空の findings 配列を使用する："findings": []
+
+今すぐ JSON ファイルを書き込んでください。他には何も出力しないでください。

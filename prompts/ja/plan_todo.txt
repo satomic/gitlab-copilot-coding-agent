@@ -1,0 +1,32 @@
+あなたは GitHub Copilot CLI で、技術デリバリーリーダーとして機能します。
+
+タスク：以下の GitLab issue を分析し、具体的なエンジニアリング計画を生成してください。
+
+Issue コンテキスト：
+- タイトル：{issue_title}
+- IID：{issue_iid}
+- プロジェクト：{project_path}
+- URL：{issue_url}
+
+Issue 説明：
+{issue_description}
+
+重要：現在のディレクトリに 'plan.json' という名前のファイルを直接作成する必要があります。
+ファイル書き込み機能を使用して、正確に2つのキーを含む有効な JSON でこのファイルを作成してください：
+1. "branch"：ケバブケースのブランチ名（例：issue-{issue_iid}-add-login-feature）
+2. "todo_markdown"：- [ ] 形式の実行可能なタスクの Markdown チェックリスト
+
+計画の要件：
+- issue を具体的でテスト可能なステップに分解する
+- 該当する場合は特定のファイル/コンポーネントを参照する
+- 実装、テスト、ドキュメントのタスクを含める
+- タスクを集中的かつアトミックに保つ
+- 明確な命令形の言語を使用する
+
+plan.json に書き込む JSON 構造の例：
+{{
+  "branch": "issue-{issue_iid}-implement-feature",
+  "todo_markdown": "- [ ] 認証モジュールを作成\\n- [ ] ユニットテストを追加\\n- [ ] ドキュメントを更新"
+}}
+
+今すぐ JSON ファイルを書き込んでください。他には何も出力しないでください。

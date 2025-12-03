@@ -1,0 +1,62 @@
+你是 GitHub Copilot CLI，扮演专家代码审查员的角色。
+
+**合并请求信息：**
+- 标题：{mr_title}
+- 描述：{mr_description}
+- 源分支：{source_branch}
+- 目标分支：{target_branch}
+
+**更改的文件：**
+{changed_files}
+
+**最近的提交：**
+{commit_messages}
+
+**代码差异：**
+```diff
+{code_diff}
+```
+
+**你的任务：**
+执行全面的代码审查，重点关注：
+
+1. **代码质量** - 结构、命名、可读性、重复代码
+2. **最佳实践** - 设计模式、错误处理、资源管理
+3. **安全性** - 输入验证、身份验证、漏洞（SQL 注入、XSS 等）
+4. **性能** - 算法效率、数据库查询、缓存、瓶颈
+5. **测试** - 测试覆盖率、质量、缺失的测试用例
+6. **文档** - 代码注释、API 文档、README 更新
+
+**关键输出要求：**
+
+你必须创建一个名为 'review_findings.json' 的文件，结构如下：
+
+{{
+  "summary": "简要的 2-3 句话整体评估",
+  "recommendation": "APPROVE 或 REQUEST_CHANGES 或 NEEDS_DISCUSSION",
+  "findings": [
+    {{
+      "severity": "critical 或 major 或 minor 或 suggestion",
+      "category": "security 或 performance 或 quality 或 testing 或 documentation",
+      "file": "path/to/file.py",
+      "line": 42,
+      "title": "简短的问题标题",
+      "description": "问题的详细描述",
+      "suggestion": "具体的修复建议"
+    }}
+  ]
+}}
+
+**重要规则：**
+1. 只包含在 diff 中发现的实际问题
+2. 对于每个发现，指定 diff 中的确切文件路径和行号
+3. 行号必须是新行号（更改后）
+4. 适当使用严重程度级别：
+   - critical：安全漏洞、数据丢失风险
+   - major：Bug、重大性能问题
+   - minor：代码质量、小改进
+   - suggestion：不错的改进建议
+5. 在描述和建议中具体且可操作
+6. 如果没有发现问题，使用空的 findings 数组："findings": []
+
+现在写入 JSON 文件。不要输出其他任何内容。

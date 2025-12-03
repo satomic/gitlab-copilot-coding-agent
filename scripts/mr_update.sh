@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/common.sh
 source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=scripts/load_prompt.sh
+source "${SCRIPT_DIR}/load_prompt.sh"
 
 cd "${REPO_ROOT}"
 
@@ -26,7 +28,8 @@ echo "[INFO] Instruction: ${MR_NOTE_INSTRUCTION}"
 # Post acknowledgment comment to MR
 echo "[INFO] Posting acknowledgment to MR ${TARGET_MR_IID}..."
 
-NOTE_BODY="👀 Got it! Copilot Coding task 🚀 started at $(date -Iseconds)."
+# Load acknowledgment message template
+NOTE_BODY=$(load_prompt "issue_ack" "timestamp=$(date -Iseconds)")
 
 if [ -n "${CI_PIPELINE_URL:-}" ]; then
   NOTE_BODY="${NOTE_BODY}
@@ -196,19 +199,9 @@ if [ "$HAS_CHANGES" = true ]; then
   git diff --cached --stat
   
   echo "[INFO] Generating commit message with Copilot..."
-  COMMIT_MSG_PROMPT="Generate a concise conventional commit message for the following changes.
-  
-Changes summary:
-$(git diff --cached --stat)
 
-Requirements:
-- Use conventional commit format (e.g., feat:, fix:, refactor:)
-- Keep it under 72 characters
-- Be descriptive but concise
-- Output ONLY the commit message, no explanations or context
-- Write the commit message to a file named 'commit_msg.txt'
-
-Generate the commit message now."
+  # Load commit message generation prompt template
+  COMMIT_MSG_PROMPT=$(load_prompt "commit_msg" "changes_summary=$(git diff --cached --stat)")
 
   # Let Copilot create the file directly
   timeout 60 copilot -p "$COMMIT_MSG_PROMPT" --allow-all-tools 2>&1 || true

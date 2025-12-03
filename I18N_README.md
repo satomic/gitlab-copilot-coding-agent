@@ -1,0 +1,209 @@
+# 🌍 Internationalization (i18n) Implementation Guide
+
+## Overview
+
+This project now supports multiple languages for Copilot-generated content including plans, MRs, comments, and code reviews.
+
+## Supported Languages
+
+- **English** (`en`) - Default
+- **Chinese** (`zh`) - 中文
+- **Japanese** (`ja`) - 日本語
+
+## Architecture
+
+### Directory Structure
+
+```
+prompts/
+├── en/               # English prompts
+│   ├── issue_ack.txt
+│   ├── plan_todo.txt
+│   ├── implement.txt
+│   ├── commit_msg.txt
+│   ├── mr_completion.txt
+│   └── code_review.txt
+├── zh/               # Chinese prompts
+│   ├── issue_ack.txt
+│   ├── plan_todo.txt
+│   ├── implement.txt
+│   ├── commit_msg.txt
+│   ├── mr_completion.txt
+│   └── code_review.txt
+└── ja/               # Japanese prompts
+    ├── issue_ack.txt
+    ├── plan_todo.txt
+    ├── implement.txt
+    ├── commit_msg.txt
+    ├── mr_completion.txt
+    └── code_review.txt
+```
+
+### Prompt Loader Utility
+
+**File**: `scripts/load_prompt.sh`
+
+**Features**:
+- Automatic language selection based on `COPILOT_LANGUAGE` environment variable
+- Fallback to English if language not found
+- Template variable replacement using `{variable_name}` syntax
+- Can accept variables from environment or as arguments
+
+**Usage**:
+```bash
+# Source the loader
+source scripts/load_prompt.sh
+
+# Load a prompt with variable substitution
+PROMPT=$(load_prompt "issue_ack" "timestamp=$(date -Iseconds)")
+
+# Or using environment variables
+export timestamp=$(date -Iseconds)
+PROMPT=$(load_prompt "issue_ack")
+```
+
+## Configuration
+
+### Environment Variable
+
+Add to `.env`:
+```bash
+# Language for Copilot-generated content
+# Supported: en (English), zh (Chinese), ja (Japanese)
+COPILOT_LANGUAGE=en
+```
+
+### Webhook Service
+
+The language setting is passed through the webhook service to CI/CD pipelines as an environment variable.
+
+## Adding a New Language
+
+### Step 1: Create Language Directory
+
+```bash
+mkdir -p prompts/<lang_code>
+```
+
+### Step 2: Create Prompt Templates
+
+Create the following files in `prompts/<lang_code>/`:
+
+1. **issue_ack.txt** - Issue acknowledgment message
+   ```
+   Variables: {timestamp}
+   ```
+
+2. **plan_todo.txt** - Planning prompt
+   ```
+   Variables: {issue_title}, {issue_iid}, {project_path}, {issue_url}, {issue_description}
+   ```
+
+3. **implement.txt** - Implementation prompt
+   ```
+   Variables: {repo_path}, {branch_name}, {target_branch}, {repo_files}, {todo_list}
+   ```
+
+4. **commit_msg.txt** - Commit message generation
+   ```
+   Variables: {changes_summary}
+   ```
+
+5. **mr_completion.txt** - MR completion message
+   ```
+   Variables: {mr_url}
+   ```
+
+6. **code_review.txt** - Code review prompt
+   ```
+   Variables: {mr_title}, {mr_description}, {source_branch}, {target_branch},
+              {changed_files}, {commit_messages}, {code_diff}
+   ```
+
+### Step 3: Test the New Language
+
+```bash
+export COPILOT_LANGUAGE=<lang_code>
+# Test in a GitLab pipeline
+```
+
+## Template Variable Format
+
+Templates use `{variable_name}` format for variable substitution:
+
+```
+Issue: {issue_title}
+Project: {project_path}
+```
+
+The loader automatically replaces these with actual values.
+
+## Benefits
+
+1. **Native Language Support**: Users can work in their preferred language
+2. **Better Understanding**: Clearer communication in native language
+3. **Easy Extension**: Simple process to add new languages
+4. **Maintainable**: Centralized prompt management
+5. **Flexible**: Supports both environment variables and explicit parameters
+
+## Implementation Status
+
+### Completed ✅
+- Directory structure created
+- English (en) prompts
+- Chinese (zh) prompts
+- Japanese (ja) prompts
+- Prompt loader utility
+- Webhook service configuration
+- Environment variable support
+
+### Pending 🔄
+- Full integration in all workflow scripts
+- Documentation updates in README
+- UI messages localization (optional)
+
+## Examples
+
+### English Output
+```
+👀 Got it! Copilot Coding task 🚀 started at 2025-12-03T10:30:00Z.
+```
+
+### Chinese Output
+```
+👀 收到！Copilot 编码任务 🚀 开始于 2025-12-03T10:30:00Z。
+```
+
+### Japanese Output
+```
+👀 了解しました！Copilot コーディングタスク 🚀 が 2025-12-03T10:30:00Z に開始されました。
+```
+
+## Best Practices
+
+1. **Keep Templates Consistent**: Ensure all language versions have the same structure
+2. **Use Clear Variables**: Variable names should be self-explanatory
+3. **Test Thoroughly**: Verify output in each language
+4. **Maintain Parity**: When updating prompts, update all languages
+5. **Cultural Sensitivity**: Consider cultural nuances in each language
+
+## Troubleshooting
+
+### Issue: Wrong language showing
+**Solution**: Check `COPILOT_LANGUAGE` environment variable in webhook service
+
+### Issue: Template not found
+**Solution**: Ensure all required templates exist in the language directory
+
+### Issue: Variables not replaced
+**Solution**: Check variable names match exactly (case-sensitive)
+
+## Future Enhancements
+
+- [ ] Korean (ko) support
+- [ ] German (de) support
+- [ ] French (fr) support
+- [ ] Spanish (es) support
+- [ ] Dynamic language detection from GitLab user preferences
+- [ ] Language-specific formatting rules
+- [ ] Automated template validation

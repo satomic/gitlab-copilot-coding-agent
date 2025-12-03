@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/common.sh
 source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=scripts/load_prompt.sh
+source "${SCRIPT_DIR}/load_prompt.sh"
 
 cd "${REPO_ROOT}"
 
@@ -122,75 +124,15 @@ COMMIT_MESSAGES=$(git log --oneline "origin/${TARGET_BRANCH}..${SOURCE_BRANCH}" 
 
 echo "[INFO] Building review prompt for Copilot..."
 
-# Build comprehensive review prompt
-REVIEW_PROMPT="You are GitHub Copilot CLI acting as an expert code reviewer.
-
-**Merge Request Information:**
-- Title: ${MR_TITLE}
-- Description: ${MR_DESCRIPTION}
-- Source Branch: ${SOURCE_BRANCH}
-- Target Branch: ${TARGET_BRANCH}
-
-**Changed Files:**
-${CHANGED_FILES}
-
-**Recent Commits:**
-${COMMIT_MESSAGES}
-
-**Code Diff:**
-\`\`\`diff
-${DIFF_OUTPUT}
-\`\`\`
-
-**Your Task:**
-Perform a comprehensive code review focusing on:
-
-1. **Code Quality**
-   - Code structure and organization
-   - Naming conventions and readability
-   - Code duplication and reusability
-   - Complexity and maintainability
-
-2. **Best Practices**
-   - Design patterns and architectural decisions
-   - Error handling and edge cases
-   - Resource management (memory, connections, etc.)
-   - Logging and debugging capabilities
-
-3. **Security**
-   - Input validation and sanitization
-   - Authentication and authorization
-   - Security vulnerabilities (SQL injection, XSS, etc.)
-   - Sensitive data handling
-
-4. **Performance**
-   - Algorithm efficiency
-   - Database query optimization
-   - Caching strategies
-   - Potential bottlenecks
-
-5. **Testing**
-   - Test coverage
-   - Test quality and relevance
-   - Missing test cases
-
-6. **Documentation**
-   - Code comments
-   - API documentation
-   - README updates if needed
-
-**Output Requirements:**
-- Start with an overall summary (2-3 sentences)
-- List findings by severity: Critical, Major, Minor, Suggestions
-- For each finding, include:
-  - File and line reference
-  - Clear description of the issue
-  - Recommended fix or improvement
-- End with a recommendation: APPROVE, REQUEST_CHANGES, or NEEDS_DISCUSSION
-- Use markdown formatting for clarity
-- Write the review to a file named 'review_summary.txt'
-
-Generate the comprehensive code review now."
+# Load code review prompt template
+REVIEW_PROMPT=$(load_prompt "code_review" \
+  "mr_title=${MR_TITLE}" \
+  "mr_description=${MR_DESCRIPTION}" \
+  "source_branch=${SOURCE_BRANCH}" \
+  "target_branch=${TARGET_BRANCH}" \
+  "changed_files=${CHANGED_FILES}" \
+  "commit_messages=${COMMIT_MESSAGES}" \
+  "code_diff=${DIFF_OUTPUT}")
 
 echo "[INFO] Invoking Copilot for code review (timeout: 3600s)..."
 if timeout 3600 copilot -p "$REVIEW_PROMPT" --allow-all-tools > review_raw.txt 2>&1; then

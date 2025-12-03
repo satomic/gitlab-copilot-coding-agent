@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/common.sh
 source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=scripts/load_prompt.sh
+source "${SCRIPT_DIR}/load_prompt.sh"
 
 cd "${REPO_ROOT}"
 
@@ -20,7 +22,8 @@ require_env TARGET_ISSUE_IID
 
 echo "[INFO] Posting acknowledgment to issue ${TARGET_ISSUE_IID}..."
 
-NOTE_BODY="👀 Got it! Copilot Coding task 🚀 started at $(date -Iseconds)."
+# Load acknowledgment message template
+NOTE_BODY=$(load_prompt "issue_ack" "timestamp=$(date -Iseconds)")
 
 if [ -n "${CI_PIPELINE_URL:-}" ]; then
   NOTE_BODY="${NOTE_BODY}
@@ -58,38 +61,13 @@ fi
 
 echo "[INFO] Generating execution plan with Copilot..."
 
-PLAN_PROMPT="You are GitHub Copilot CLI acting as a technical delivery lead.
-
-Task: Analyze the following GitLab issue and generate a concrete engineering plan.
-
-Issue Context:
-- Title: ${ISSUE_TITLE}
-- IID: ${TARGET_ISSUE_IID}
-- Project: ${TARGET_PROJECT_PATH}
-- URL: ${ISSUE_URL}
-
-Issue Description:
-${ORIGINAL_NEEDS}
-
-CRITICAL: You must write your response directly to a file named 'plan.json' in the current directory.
-Use the file writing capability to create this file with valid JSON containing exactly two keys:
-1. \"branch\": A kebab-case branch name (e.g., issue-${TARGET_ISSUE_IID}-add-login-feature)
-2. \"todo_markdown\": A Markdown checklist with actionable tasks using - [ ] format
-
-Requirements for the plan:
-- Break the issue into concrete, testable steps
-- Reference specific files/components when applicable
-- Include implementation, testing, and documentation tasks
-- Keep tasks focused and atomic
-- Use clear, imperative language
-
-Example JSON structure to write to plan.json:
-{
-  \"branch\": \"issue-${TARGET_ISSUE_IID}-implement-feature\",
-  \"todo_markdown\": \"- [ ] Create auth module\\n- [ ] Add unit tests\\n- [ ] Update documentation\"
-}
-
-Write the JSON file now. Do not output anything else."
+# Load plan generation prompt template
+PLAN_PROMPT=$(load_prompt "plan_todo" \
+  "issue_title=${ISSUE_TITLE}" \
+  "issue_iid=${TARGET_ISSUE_IID}" \
+  "project_path=${TARGET_PROJECT_PATH}" \
+  "issue_url=${ISSUE_URL}" \
+  "issue_description=${ORIGINAL_NEEDS}")
 
 echo "[INFO] Invoking Copilot to generate plan.json (timeout: 3600s)..."
 if timeout 3600 copilot -p "$PLAN_PROMPT" --allow-all-tools > copilot_output.log 2>&1; then
@@ -279,36 +257,13 @@ echo "[INFO] Building implementation prompt for Copilot..."
 
 REPO_FILES=$(find . -type f -not -path '*/.git/*' -not -path '*/node_modules/*' | head -50 | tr '\n' ', ')
 
-IMPL_PROMPT="You are GitHub Copilot CLI acting as a coding agent.
-
-Repository Context:
-- Path: $(pwd)
-- Branch: ${NEW_BRANCH_NAME}
-- Base branch: ${TARGET_BRANCH}
-- Sample files: ${REPO_FILES}
-
-Task List:
-$(cat todo.md)
-
-Your job:
-1. Analyze the repository structure
-2. Implement ALL tasks from the checklist above
-3. Generate a unified diff patch with your changes
-4. Enclose the patch in triple backticks with 'diff' language marker
-
-Requirements:
-- Produce working, tested code
-- Follow existing code style and patterns
-- Include necessary imports and dependencies
-- Add inline comments for complex logic
-- Check if there is an appropriate .gitignore file; if not, create one based on the current technology stack. If it already exists, update it to match the technology stack and ensure it includes these automation files: patch_raw.txt, todo.md, plan.json, commit_msg.txt
-
-Output format:
-\`\`\`diff
-[your unified diff here]
-\`\`\`
-
-Generate the implementation now."
+# Load implementation prompt template
+IMPL_PROMPT=$(load_prompt "implement" \
+  "repo_path=$(pwd)" \
+  "branch_name=${NEW_BRANCH_NAME}" \
+  "target_branch=${TARGET_BRANCH}" \
+  "repo_files=${REPO_FILES}" \
+  "todo_list=$(cat todo.md)")
 
 echo "[INFO] Invoking Copilot for code generation (timeout: 3600s)..."
 if timeout 3600 copilot -p "$IMPL_PROMPT" --allow-all-tools > patch_raw.txt 2>&1; then
@@ -369,19 +324,9 @@ if [ "$HAS_CHANGES" = true ]; then
   git diff --cached --stat
 
   echo "[INFO] Generating commit message with Copilot..."
-  COMMIT_MSG_PROMPT="Generate a concise conventional commit message for the following changes.
 
-Changes summary:
-$(git diff --cached --stat)
-
-Requirements:
-- Use conventional commit format (e.g., feat:, fix:, refactor:)
-- Keep it under 72 characters
-- Be descriptive but concise
-- Output ONLY the commit message, no explanations or context
-- Write the commit message to a file named 'commit_msg.txt'
-
-Generate the commit message now."
+  # Load commit message generation prompt template
+  COMMIT_MSG_PROMPT=$(load_prompt "commit_msg" "changes_summary=$(git diff --cached --stat)")
 
   timeout 60 copilot -p "$COMMIT_MSG_PROMPT" --allow-all-tools 2>&1 || true
 
@@ -504,10 +449,14 @@ if ! curl "${CURL_ARGS[@]}" "${API}/merge_requests/${NEW_MR_IID}" > /dev/null; t
 fi
 
 echo "[INFO] Posting completion comment to issue ${TARGET_ISSUE_IID}..."
+
+# Load completion message template
+COMPLETION_BODY=$(load_prompt "mr_completion" "mr_url=${NEW_MR_URL}")
+
 if ! curl --silent --show-error --fail \
   --request POST \
   --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-  --data-urlencode "body=🤖 Copilot Coding completed, the latest TODO has been synced to MR: ${NEW_MR_URL} 👈" \
+  --data-urlencode "body=${COMPLETION_BODY}" \
   "${API}/issues/${TARGET_ISSUE_IID}/notes" > /dev/null; then
   echo "[ERROR] Failed to post issue comment" >&2
   exit 1

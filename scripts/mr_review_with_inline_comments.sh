@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/common.sh
 source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=scripts/load_prompt.sh
+source "${SCRIPT_DIR}/load_prompt.sh"
 
 cd "${REPO_ROOT}"
 
@@ -133,69 +135,15 @@ git diff "origin/${TARGET_BRANCH}...${SOURCE_BRANCH}" > full_diff.txt
 
 echo "[INFO] Building review prompt for Copilot..."
 
-# Build comprehensive review prompt
-REVIEW_PROMPT="You are GitHub Copilot CLI acting as an expert code reviewer.
-
-**Merge Request Information:**
-- Title: ${MR_TITLE}
-- Description: ${MR_DESCRIPTION}
-- Source Branch: ${SOURCE_BRANCH}
-- Target Branch: ${TARGET_BRANCH}
-
-**Changed Files:**
-${CHANGED_FILES}
-
-**Recent Commits:**
-${COMMIT_MESSAGES}
-
-**Code Diff:**
-\`\`\`diff
-${DIFF_OUTPUT}
-\`\`\`
-
-**Your Task:**
-Perform a comprehensive code review focusing on:
-
-1. **Code Quality** - Structure, naming, readability, duplication
-2. **Best Practices** - Design patterns, error handling, resource management
-3. **Security** - Input validation, authentication, vulnerabilities (SQL injection, XSS, etc.)
-4. **Performance** - Algorithm efficiency, database queries, caching, bottlenecks
-5. **Testing** - Test coverage, quality, missing test cases
-6. **Documentation** - Code comments, API docs, README updates
-
-**CRITICAL OUTPUT REQUIREMENTS:**
-
-You MUST create a file named 'review_findings.json' with this EXACT structure:
-
-{
-  \"summary\": \"Brief 2-3 sentence overall assessment\",
-  \"recommendation\": \"APPROVE or REQUEST_CHANGES or NEEDS_DISCUSSION\",
-  \"findings\": [
-    {
-      \"severity\": \"critical or major or minor or suggestion\",
-      \"category\": \"security or performance or quality or testing or documentation\",
-      \"file\": \"path/to/file.py\",
-      \"line\": 42,
-      \"title\": \"Brief issue title\",
-      \"description\": \"Detailed description of the issue\",
-      \"suggestion\": \"Specific recommendation to fix\"
-    }
-  ]
-}
-
-**Important Rules:**
-1. Only include findings for ACTUAL issues found in the diff
-2. For each finding, specify the EXACT file path and line number from the diff
-3. Line numbers must be the NEW line numbers (after changes)
-4. Use severity levels appropriately:
-   - critical: Security vulnerabilities, data loss risks
-   - major: Bugs, significant performance issues
-   - minor: Code quality, minor improvements
-   - suggestion: Nice-to-have improvements
-5. Be specific and actionable in descriptions and suggestions
-6. If no issues found, use empty findings array: \"findings\": []
-
-Write the JSON file now. Do not output anything else."
+# Load code review prompt template
+REVIEW_PROMPT=$(load_prompt "code_review" \
+  "mr_title=${MR_TITLE}" \
+  "mr_description=${MR_DESCRIPTION}" \
+  "source_branch=${SOURCE_BRANCH}" \
+  "target_branch=${TARGET_BRANCH}" \
+  "changed_files=${CHANGED_FILES}" \
+  "commit_messages=${COMMIT_MESSAGES}" \
+  "code_diff=${DIFF_OUTPUT}")
 
 echo "[INFO] Invoking Copilot for code review (timeout: 3600s)..."
 if timeout 3600 copilot -p "$REVIEW_PROMPT" --allow-all-tools > review_raw.txt 2>&1; then

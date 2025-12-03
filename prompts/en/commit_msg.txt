@@ -1,0 +1,13 @@
+Generate a concise conventional commit message for the following changes.
+
+Changes summary:
+{changes_summary}
+
+Requirements:
+- Use conventional commit format (e.g., feat:, fix:, refactor:)
+- Keep it under 72 characters
+- Be descriptive but concise
+- Output ONLY the commit message, no explanations or context
+- Write the commit message to a file named 'commit_msg.txt'
+
+Generate the commit message now.
