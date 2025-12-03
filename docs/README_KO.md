@@ -16,10 +16,10 @@ GitHub Copilot CLI와 GitLab CI/CD로 구동되는 완전 자동화된 코딩 �
 
 **예시 리포지토리**
 - 공개 GitLab 데모 리포지토리 [app-repo-01](https://gitlab.com/agentic-devops/app-repo-01)
-- Issue: [a webhook receiver app](https://gitlab.com/agentic-devops/app-repo-01/-/issues/9)
-- MR: [Copilot Generated MR for issue #9](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/13)
-- 댓글로 MR 업데이트: [@copilot-agent change reamdme to Korean](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/15#note_2901129017)
-- 코드 검토: [Assign Copilot as MR Reviewer](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)
+- Issue: [하나의 webhook receiver 애플리케이션](https://gitlab.com/agentic-devops/app-repo-01/-/issues/19)
+- MR: [하나의 webhook receiver 애플리케이션 (#19)](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/24)
+- 댓글로 MR 업데이트: [@copilot-agent readme 를 한국어로 바꾸다](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/24#note_2929985888)
+- 코드 검토: [Copilot을 MR의 검토자로 지정](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)
 
 ## 🏗️ 아키텍처
 

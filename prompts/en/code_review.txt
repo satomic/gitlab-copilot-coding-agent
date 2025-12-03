@@ -31,11 +31,11 @@ Perform a comprehensive code review focusing on:
 
 You MUST create a file named 'review_findings.json' with this EXACT structure:
 
-{{
+{
   "summary": "Brief 2-3 sentence overall assessment",
   "recommendation": "APPROVE or REQUEST_CHANGES or NEEDS_DISCUSSION",
   "findings": [
-    {{
+    {
       "severity": "critical or major or minor or suggestion",
       "category": "security or performance or quality or testing or documentation",
       "file": "path/to/file.py",
@@ -43,9 +43,9 @@ You MUST create a file named 'review_findings.json' with this EXACT structure:
       "title": "Brief issue title",
       "description": "Detailed description of the issue",
       "suggestion": "Specific recommendation to fix"
-    }}
+    }
   ]
-}}
+}
 
 **Important Rules:**
 1. Only include findings for ACTUAL issues found in the diff

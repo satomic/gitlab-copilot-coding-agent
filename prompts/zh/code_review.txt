@@ -31,11 +31,11 @@
 
 你必须创建一个名为 'review_findings.json' 的文件，结构如下：
 
-{{
+{
   "summary": "简要的 2-3 句话整体评估",
   "recommendation": "APPROVE 或 REQUEST_CHANGES 或 NEEDS_DISCUSSION",
   "findings": [
-    {{
+    {
       "severity": "critical 或 major 或 minor 或 suggestion",
       "category": "security 或 performance 或 quality 或 testing 或 documentation",
       "file": "path/to/file.py",
@@ -43,9 +43,9 @@
       "title": "简短的问题标题",
       "description": "问题的详细描述",
       "suggestion": "具体的修复建议"
-    }}
+    }
   ]
-}}
+}
 
 **重要规则：**
 1. 只包含在 diff 中发现的实际问题

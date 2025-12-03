@@ -19,7 +19,7 @@ GitHub Copilot CLI और GitLab CI/CD द्वारा संचालित 
 - Issue: [एक Webhook रिसीवर एप्लिकेशन](https://gitlab.com/agentic-devops/app-repo-01/-/issues/18)
 - MR: [एक Webhook रिसीवर एप्लिकेशन (#18)](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/23)
 - Comment के साथ MR अपडेट करें: [@copilot-agent readme को हिंदी में बदलें](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/23#note_2929895227)
-- कोड समीक्षा: [MR में Copilot को समीक्षा करने वाले के रूप में असाइन करें](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)
+- कोड समीक्षा: [MR में Copilot को समीक्षा करने वाले के रूप में असाइन करें](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/23#note_2929964796)
 
 ## 🏗️ आर्किटेक्चर
 

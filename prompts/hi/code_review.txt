@@ -31,11 +31,11 @@
 
 आपको इस सटीक संरचना के साथ 'review_findings.json' नाम की एक फ़ाइल बनानी होगी:
 
-{{
+{
   "summary": "संक्षिप्त 2-3 वाक्य समग्र मूल्यांकन",
   "recommendation": "APPROVE या REQUEST_CHANGES या NEEDS_DISCUSSION",
   "findings": [
-    {{
+    {
       "severity": "critical या major या minor या suggestion",
       "category": "security या performance या quality या testing या documentation",
       "file": "path/to/file.py",
@@ -43,9 +43,9 @@
       "title": "संक्षिप्त समस्या शीर्षक",
       "description": "समस्या का विस्तृत विवरण",
       "suggestion": "ठीक करने के लिए विशिष्ट सिफारिश"
-    }}
+    }
   ]
-}}
+}
 
 **महत्वपूर्ण नियम:**
 1. केवल diff में पाई गई वास्तविक समस्याओं को शामिल करें

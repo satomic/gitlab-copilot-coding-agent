@@ -31,11 +31,11 @@
 
 다음과 같은 정확한 구조로 'review_findings.json'이라는 파일을 만들어야 합니다:
 
-{{
+{
   "summary": "간략한 2-3문장의 전체 평가",
   "recommendation": "APPROVE 또는 REQUEST_CHANGES 또는 NEEDS_DISCUSSION",
   "findings": [
-    {{
+    {
       "severity": "critical 또는 major 또는 minor 또는 suggestion",
       "category": "security 또는 performance 또는 quality 또는 testing 또는 documentation",
       "file": "path/to/file.py",
@@ -43,9 +43,9 @@
       "title": "간단한 이슈 제목",
       "description": "이슈에 대한 상세한 설명",
       "suggestion": "수정을 위한 구체적인 권장사항"
-    }}
+    }
   ]
-}}
+}
 
 **중요한 규칙:**
 1. diff에서 발견된 실제 이슈만 포함
