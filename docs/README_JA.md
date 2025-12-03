@@ -1,6 +1,6 @@
 # GitLab 用 Copilot コーディングエージェント
 
-[中文](./README_CN.md) | [English](./README.md) | 日本語
+[English](../README.md) | [中文](./README_CN.md) | 日本語 | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md)
 
 GitHub Copilot CLI と GitLab CI/CD を活用した完全自動コーディングエージェント。Issue 割り当て、マージリクエストコメント、マージリクエストレビュアー割り当てを通じて、自律的なコード実装とインテリジェントなコードレビューを実現します。
 
@@ -113,7 +113,7 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
    - トークン名: `copilot-automation`
    - スコープ: すべてのスコープを選択（または最低限: `api`, `read_repository`, `write_repository`）
    - トークンを安全に保存
-   ![#gitlab-pat](images/gitlab-pat.png)
+   ![#gitlab-pat](../images/gitlab-pat.png)
 
 3. このユーザーに適切な権限を付与（どちらかのアプローチを選択）:
    - **オプション A（組織全体での使用を推奨）**: GitLab **管理者**またはグループ **オーナー**として設定
@@ -132,11 +132,11 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
      ```bash
      https://github.com/satomic/gitlab-copilot-coding-agent.git
      ```
-      ![#gl-create-project](images/gl-create-project.png)
-      ![#gl-import-project](images/gl-import-project.png)
-      ![#gl-repo-url](images/gl-repo-url.png)
+      ![#gl-create-project](../images/gl-create-project.png)
+      ![#gl-import-project](../images/gl-import-project.png)
+      ![#gl-repo-url](../images/gl-repo-url.png)
    - 新しくインポートされたリポジトリの可視性は Internal に設定してください
-      ![#gl-import-settings](images/gl-import-settings.png)
+      ![#gl-import-settings](../images/gl-import-settings.png)
 
 2. **CI/CD 変数を設定**
 
@@ -151,13 +151,13 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
    - https://github.com/settings/personal-access-tokens/new にアクセス
    - 「Permissions」の下で「add permissions」をクリックし、「Copilot Requests」を選択
    - トークンを生成
-   ![#copilot-pat](images/copilot-pat.png)
+   ![#copilot-pat](../images/copilot-pat.png)
 
 
-   ![#cicd-variables](images/cicd-variables.png)
+   ![#cicd-variables](../images/cicd-variables.png)
 
    パイプライン変数を使用できる役割を Developer に変更することを忘れないでください
-   ![#ppl-variables-permission](images/ppl-variables-permission.png)
+   ![#ppl-variables-permission](../images/ppl-variables-permission.png)
 
 3. **GitLab Runner のセットアップ**
    > GitLab インスタンスに Docker/Kubernetes executor を持つ利用可能な Runner がすでにある場合は、このステップをスキップできます。
@@ -167,7 +167,7 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
    - Docker イメージへのアクセス: `satomic/copilot-cli:latest`
 
    タグを使用する場合は、Runner に対応するタグがあることを確認するか、必要に応じて `.gitlab-ci.yml` を更新してください。新しい Runner の登録は GitLab のページガイダンスに従って完了でき、プロジェクトまたはグループレベルで登録できます。以下はプロジェクトレベルの例です:
-   ![#runner-register](images/runner-register.png)
+   ![#runner-register](../images/runner-register.png)
 
 4. **Copilot CLI アクセスの設定**
 
@@ -197,11 +197,11 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
    ```
 
    - `PIPELINE_TRIGGER_TOKEN`: ステップ 2 で作成したリポジトリの **Settings** → **CI/CD** → **Pipeline trigger tokens** で生成
-   ![#ppl-trigger-token](images/ppl-trigger-token.png)
+   ![#ppl-trigger-token](../images/ppl-trigger-token.png)
    - `PIPELINE_PROJECT_ID`: このリポジトリのプロジェクト ID（**Settings** → **General** で確認）
-   ![#ppl-project-id](images/ppl-project-id.png)
+   ![#ppl-project-id](../images/ppl-project-id.png)
    - `COPILOT_AGENT_USERNAME`: ステップ 1 で作成した Copilot ボットユーザーの GitLab ID
-   ![#gitlab-id](images/gitlab-id.png)
+   ![#gitlab-id](../images/gitlab-id.png)
 
 2. **Docker で実行**
    ```bash
@@ -232,7 +232,7 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
    - Secret Token: （`WEBHOOK_SECRET_TOKEN` と同じ）
    - Trigger: ✅ **Issues events**, ✅ **Comments**（note events）, ✅ **Merge request events**
    - **Add webhook** をクリック
-   ![#webhook](images/webhook.png)
+   ![#webhook](../images/webhook.png)
 
 3. **webhook をテスト**
    - **Test** → **Issue events** をクリック
@@ -244,25 +244,25 @@ Copilot を MR レビュアーに割り当て → Webhook → パイプライン
 1. **Issue 割り当てをテスト**
    - アプリケーションリポジトリでテスト Issue を作成
    - Copilot ユーザーに割り当て
-   ![#issue-assign](images/issue-assign.png)
+   ![#issue-assign](../images/issue-assign.png)
    - Copilot コーディングエージェントリポジトリで CI/CD パイプラインのトリガーを確認
-   ![#coding-agent-ppl](images/coding-agent-ppl.png)
+   ![#coding-agent-ppl](../images/coding-agent-ppl.png)
    - MR 作成とコード実装を確認
-   ![#mr1](images/mr1.png)
-   ![#mr2](images/mr2.png)
+   ![#mr1](../images/mr1.png)
+   ![#mr2](../images/mr2.png)
 
 2. **MR Note をテスト**
    - アプリケーションリポジトリでテスト MR を作成
    - コメント: `@copilot-agent add a hello world function`
-   ![#mr-update](images/mr-update.png)
+   ![#mr-update](../images/mr-update.png)
    - パイプライン実行とコード変更を確認
-   ![#mr-update-ppl](images/mr-update-ppl.png)
+   ![#mr-update-ppl](../images/mr-update-ppl.png)
 
 3. **MR Reviewer をテスト**
    - アプリケーションリポジトリでテスト MR を作成または開く、Copilot ユーザーをレビュアーに割り当て
-   ![#mr-reviewer](images/mr-reviewer.png)
+   ![#mr-reviewer](../images/mr-reviewer.png)
    - パイプライン実行とレビューコメントの投稿を確認、Copilot が投稿した詳細なコードレビューレポートを確認
-   ![#mr-review-result](images/mr-review-result.png)
+   ![#mr-review-result](../images/mr-review-result.png)
 
 4. **ログを確認**
    ```bash

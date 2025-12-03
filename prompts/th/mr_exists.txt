@@ -1,0 +1,7 @@
+🔄 Merge request สำหรับ issue นี้มีอยู่แล้ว!
+
+📋 **MR ที่มีอยู่**: {mr_url}
+
+หากคุณต้องการทำงานต่อกับ issue นี้ โปรดไปที่ MR ด้านบนและ mention @{copilot_username} ในความคิดเห็นพร้อมคำแนะนำของคุณ
+
+cc @{assigner_username}

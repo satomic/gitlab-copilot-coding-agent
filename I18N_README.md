@@ -9,6 +9,9 @@ This project now supports multiple languages for Copilot-generated content inclu
 - **English** (`en`) - Default
 - **Chinese** (`zh`) - 中文
 - **Japanese** (`ja`) - 日本語
+- **Hindi** (`hi`) - हिन्दी
+- **Korean** (`ko`) - 한국어
+- **Thai** (`th`) - ภาษาไทย
 
 ## Architecture
 
@@ -42,7 +45,46 @@ prompts/
 │   ├── mr_no_changes.txt
 │   ├── review_ack.txt
 │   └── code_review.txt
-└── ja/               # Japanese prompts
+├── ja/               # Japanese prompts
+│   ├── issue_ack.txt
+│   ├── plan_todo.txt
+│   ├── implement.txt
+│   ├── commit_msg.txt
+│   ├── mr_completion.txt
+│   ├── mr_exists.txt
+│   ├── mr_update.txt
+│   ├── mr_summary.txt
+│   ├── mr_update_completion.txt
+│   ├── mr_no_changes.txt
+│   ├── review_ack.txt
+│   └── code_review.txt
+├── hi/               # Hindi prompts
+│   ├── issue_ack.txt
+│   ├── plan_todo.txt
+│   ├── implement.txt
+│   ├── commit_msg.txt
+│   ├── mr_completion.txt
+│   ├── mr_exists.txt
+│   ├── mr_update.txt
+│   ├── mr_summary.txt
+│   ├── mr_update_completion.txt
+│   ├── mr_no_changes.txt
+│   ├── review_ack.txt
+│   └── code_review.txt
+├── ko/               # Korean prompts
+│   ├── issue_ack.txt
+│   ├── plan_todo.txt
+│   ├── implement.txt
+│   ├── commit_msg.txt
+│   ├── mr_completion.txt
+│   ├── mr_exists.txt
+│   ├── mr_update.txt
+│   ├── mr_summary.txt
+│   ├── mr_update_completion.txt
+│   ├── mr_no_changes.txt
+│   ├── review_ack.txt
+│   └── code_review.txt
+└── th/               # Thai prompts
     ├── issue_ack.txt
     ├── plan_todo.txt
     ├── implement.txt
@@ -83,7 +125,7 @@ PROMPT=$(load_prompt "issue_ack")
 Add to `.env`:
 ```bash
 # Language for Copilot-generated content
-# Supported: en (English), zh (Chinese), ja (Japanese)
+# Supported: en (English), zh (Chinese), ja (Japanese), hi (Hindi), ko (Korean), th (Thai)
 COPILOT_LANGUAGE=en
 ```
 
@@ -197,6 +239,9 @@ The loader automatically replaces these with actual values.
 - English (en) prompts
 - Chinese (zh) prompts
 - Japanese (ja) prompts
+- Hindi (hi) prompts
+- Korean (ko) prompts
+- Thai (th) prompts
 - Prompt loader utility with safe variable handling
 - Webhook service configuration
 - Environment variable support
@@ -207,9 +252,15 @@ The loader automatically replaces these with actual values.
   - mr_review_with_inline_comments.sh
 - Windows/Linux cross-platform path handling
 - UTF-8 encoding support for emoji and special characters
+- README files in all supported languages:
+  - README.md (English) - Root directory
+  - docs/README_CN.md (Chinese)
+  - docs/README_JA.md (Japanese)
+  - docs/README_HI.md (Hindi)
+  - docs/README_KO.md (Korean)
+  - docs/README_TH.md (Thai)
 
 ### Pending 🔄
-- Documentation updates in main README files
 - UI messages localization (optional)
 
 ## Examples
@@ -227,6 +278,21 @@ The loader automatically replaces these with actual values.
 ### Japanese Output
 ```
 👀 了解しました！Copilot コーディングタスク 🚀 が 2025-12-03T10:30:00Z に開始されました。
+```
+
+### Hindi Output
+```
+👀 मिल गया! Copilot कोडिंग कार्य 🚀 शुरू हो गया है।
+```
+
+### Korean Output
+```
+👀 확인했습니다! Copilot 코딩 작업 🚀이 시작되었습니다.
+```
+
+### Thai Output
+```
+👀 รับทราบแล้ว! งานเขียนโค้ด Copilot 🚀 เริ่มต้นแล้ว
 ```
 
 ## Best Practices
@@ -253,10 +319,7 @@ The loader automatically replaces these with actual values.
 
 ## Future Enhancements
 
-- [ ] Korean (ko) support
-- [ ] German (de) support
-- [ ] French (fr) support
-- [ ] Spanish (es) support
+- [ ] Other language support
 - [ ] Dynamic language detection from GitLab user preferences
 - [ ] Language-specific formatting rules
 - [ ] Automated template validation

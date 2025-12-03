@@ -1,6 +1,6 @@
 # Copilot Coding Agent for GitLab
 
-中文 | [English](./README.md) | [日本語](./README_JA.md)
+[English](../README.md) | 中文 | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md)
 
 一个由 GitHub Copilot CLI 和 GitLab CI/CD 驱动的全自动代码智能体。该系统通过 Issue 分配、Merge Request 评论以及 Merge Request Reviewer 指定实现自主代码实现和智能代码审查。
 
@@ -117,7 +117,7 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    - 令牌名称：`copilot-automation`
    - 作用域：建议全选（或至少包含：`api`、`read_repository`、`write_repository`）
    - 安全保存令牌
-   ![#gitlab-pat](images/gitlab-pat.png)
+   ![#gitlab-pat](../images/gitlab-pat.png)
 
 3. 为此用户授予适当的权限（选择其中一种方式）：
    - **方案 A（推荐用于组织级使用）**：设置为 GitLab **管理员（Administrator）** 或群组 **Owner**
@@ -136,11 +136,11 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
       ```bash
       https://github.com/satomic/gitlab-copilot-coding-agent.git
       ```
-      ![#gl-create-project](images/gl-create-project.png)
-      ![#gl-import-project](images/gl-import-project.png)
-      ![#gl-repo-url](images/gl-repo-url.png)
+      ![#gl-create-project](../images/gl-create-project.png)
+      ![#gl-import-project](../images/gl-import-project.png)
+      ![#gl-repo-url](../images/gl-repo-url.png)
    - 新导入的仓库的可见性应该为内部可见
-      ![#gl-import-settings](images/gl-import-settings.png)
+      ![#gl-import-settings](../images/gl-import-settings.png)
 
 
 2. **配置 CI/CD 变量**
@@ -156,13 +156,13 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    - 访问 https://github.com/settings/personal-access-tokens/new
    - 在“Permissions”下，点击“add permissions”，选择“Copilot Requests”
    - 生成你的令牌
-   ![#copilot-pat](images/copilot-pat.png)
+   ![#copilot-pat](../images/copilot-pat.png)
 
   
-   ![#cicd-variables](images/cicd-variables.png)
+   ![#cicd-variables](../images/cicd-variables.png)
 
    记住，要把使用pipeline variables的角色修改一下，改为Developer
-   ![#ppl-variables-permission](images/ppl-variables-permission.png)
+   ![#ppl-variables-permission](../images/ppl-variables-permission.png)
 
 3. **设置 GitLab Runner**
    > 如果你的 GitLab 实例已经有可用的执行器为Docker/Kubernetes的Runner，可以跳过此步骤。
@@ -172,7 +172,7 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    - 可访问 Docker 镜像：`satomic/copilot-cli:latest`
 
    如果使用标签，请确保 Runner 有相应标签，或者根据需要更新 `.gitlab-ci.yml`。新 Runner 注册可以根据GitLab页面引导完成，可以在project层级或group层级注册Runner。以project为例：
-   ![#runner-register](images/runner-register.png)
+   ![#runner-register](../images/runner-register.png)
 
 
 4. **配置 Copilot CLI 访问**
@@ -202,11 +202,11 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    EOF
    ```
    - `PIPELINE_TRIGGER_TOKEN`：在步骤 2 中创建的仓库的 **Settings** → **CI/CD** → **Pipeline trigger tokens** 中生成
-   ![#ppl-trigger-token](images/ppl-trigger-token.png)
+   ![#ppl-trigger-token](../images/ppl-trigger-token.png)
    - `PIPELINE_PROJECT_ID`：此仓库的项目 ID（在 **Settings** → **General** 中找到）
-   ![#ppl-project-id](images/ppl-project-id.png)
+   ![#ppl-project-id](../images/ppl-project-id.png)
    - `COPILOT_AGENT_USERNAME`：步骤 1 中创建的 Copilot 机器人用户的 GitLab ID
-   ![#gitlab-id](images/gitlab-id.png)
+   ![#gitlab-id](../images/gitlab-id.png)
 
 
 2. **使用 Docker 运行**
@@ -239,7 +239,7 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    - 密钥令牌：（与 `WEBHOOK_SECRET_TOKEN` 相同）
    - 触发器：✅ **Issues events**、✅ **Comments** (note events) 和 ✅ **Merge request events**
    - 点击 **Add webhook**
-   ![#webhook](images/webhook.png)
+   ![#webhook](../images/webhook.png)
 
 3. **测试 webhook**
    - 点击 **Test** → **Issue events**
@@ -251,25 +251,25 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
 1. **测试 Issue 分配**
    - 在应用仓库中创建测试 issue
    - 将其分配给 Copilot 用户
-   ![#issue-assign](images/issue-assign.png)
+   ![#issue-assign](../images/issue-assign.png)
    - 观察 Copilot 代码智能体仓库中的 CI/CD pipeline 触发
-   ![#coding-agent-ppl](images/coding-agent-ppl.png)
+   ![#coding-agent-ppl](../images/coding-agent-ppl.png)
    - 验证 MR 创建和代码实现
-   ![#mr1](images/mr1.png)
-   ![#mr2](images/mr2.png)
+   ![#mr1](../images/mr1.png)
+   ![#mr2](../images/mr2.png)
 
 2. **测试 MR Note**
    - 在应用仓库中创建测试 MR
    - 评论：`@copilot-agent add a hello world function`
-   ![#mr-update](images/mr-update.png)
+   ![#mr-update](../images/mr-update.png)
    - 验证 pipeline 执行和代码变更
-   ![#mr-update-ppl](images/mr-update-ppl.png)
+   ![#mr-update-ppl](../images/mr-update-ppl.png)
 
 3. **测试 MR Reviewer**
    - 在应用仓库中创建或打开测试 MR，在 Reviewers 中指定 Copilot 用户
-   ![#mr-reviewer](images/mr-reviewer.png)
+   ![#mr-reviewer](../images/mr-reviewer.png)
    - 验证 pipeline 执行和审查评论发布，并查看 Copilot 发布的详细代码审查报告
-   ![#mr-review-result](images/mr-review-result.png)
+   ![#mr-review-result](../images/mr-review-result.png)
 
 4. **检查日志**
    ```bash

@@ -1,6 +1,6 @@
 # Copilot Coding Agent for GitLab
 
-[中文](./README_CN.md) | English | [日本語](./README_JA.md)
+English | [中文](./docs/README_CN.md) | [日本語](./docs/README_JA.md) | [हिन्दी](./docs/README_HI.md) | [한국어](./docs/README_KO.md) | [ภาษาไทย](./docs/README_TH.md)
 
 A fully automated coding agent powered by GitHub Copilot CLI and GitLab CI/CD. This system enables autonomous code implementation and intelligent code review through issue assignments, merge request comments, and merge request reviewer assignments.
 
