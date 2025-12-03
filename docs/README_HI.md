@@ -16,7 +16,7 @@ GitHub Copilot CLI और GitLab CI/CD द्वारा संचालित 
 
 **उदाहरण रिपॉजिटरी**
 - सार्वजनिक GitLab डेमो रिपॉजिटरी [app-repo-01](https://gitlab.com/agentic-devops/app-repo-01)
-- Issue: [a webhook receiver app](https://gitlab.com/agentic-devops/app-repo-01/-/issues/9)
+- Issue: [एक Webhook रिसीवर एप्लिकेशन](https://gitlab.com/agentic-devops/app-repo-01/-/issues/18)
 - MR: [Copilot Generated MR for issue #9](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/13)
 - Comment के साथ MR अपडेट करें: [@copilot-agent change reamdme to Korean](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/15#note_2901129017)
 - कोड समीक्षा: [Assign Copilot as MR Reviewer](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)

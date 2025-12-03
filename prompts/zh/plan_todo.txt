@@ -24,9 +24,11 @@ Issue 描述：
 - 使用清晰的祈使语气
 
 写入 plan.json 的 JSON 结构示例：
-{{
+```
+{
   "branch": "issue-{issue_iid}-implement-feature",
   "todo_markdown": "- [ ] 创建认证模块\\n- [ ] 添加单元测试\\n- [ ] 更新文档"
-}}
+}
+```
 
 现在写入 JSON 文件。不要输出其他任何内容。

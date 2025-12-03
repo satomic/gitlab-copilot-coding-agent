@@ -16,10 +16,10 @@ GitHub Copilot CLI と GitLab CI/CD を活用した完全自動コーディン�
 
 **サンプルリポジトリ**
 - パブリック GitLab デモリポジトリ [app-repo-01](https://gitlab.com/agentic-devops/app-repo-01)
-- Issue: [a webhook receiver app](https://gitlab.com/agentic-devops/app-repo-01/-/issues/9)
-- MR: [Copilot Generated MR for issue #9](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/13)
-- コメントで MR を更新: [@copilot-agent change reamdme to Korean](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/15#note_2901129017)
-- コードレビュー: [Assign Copilot as MR Reviewer](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/16#note_2929461255)
+- Issue: [webhook receiverアプリケーション](https://gitlab.com/agentic-devops/app-repo-01/-/issues/17)
+- MR: [Cwebhook receiverアプリケーション (#17)](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/22)
+- コメントで MR を更新: [@copilot-agent readmeを日本語に変更](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/22#note_2929811253)
+- コードレビュー: [MRにCopilotを指定するレビュー担当者](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/22#note_2929831527)
 
 ## 🏗️ アーキテクチャ
 

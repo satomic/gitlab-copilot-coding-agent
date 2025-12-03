@@ -24,9 +24,11 @@ Requirements for the plan:
 - Use clear, imperative language
 
 Example JSON structure to write to plan.json:
-{{
+```
+{
   "branch": "issue-{issue_iid}-implement-feature",
   "todo_markdown": "- [ ] Create auth module\\n- [ ] Add unit tests\\n- [ ] Update documentation"
-}}
+}
+```
 
 Write the JSON file now. Do not output anything else.

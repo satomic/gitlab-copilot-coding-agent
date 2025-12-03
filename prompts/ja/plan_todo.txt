@@ -24,9 +24,11 @@ Issue 説明：
 - 明確な命令形の言語を使用する
 
 plan.json に書き込む JSON 構造の例：
-{{
+```
+{
   "branch": "issue-{issue_iid}-implement-feature",
   "todo_markdown": "- [ ] 認証モジュールを作成\\n- [ ] ユニットテストを追加\\n- [ ] ドキュメントを更新"
-}}
+}
+```
 
 今すぐ JSON ファイルを書き込んでください。他には何も出力しないでください。
