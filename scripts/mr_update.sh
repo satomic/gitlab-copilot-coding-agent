@@ -88,36 +88,13 @@ echo "[INFO] Building implementation prompt for Copilot..."
 # Get repository context
 REPO_FILES=$(find . -type f -not -path '*/.git/*' -not -path '*/node_modules/*' | head -50 | tr '\n' ', ')
 
-IMPL_PROMPT="You are GitHub Copilot CLI acting as a coding agent.
-
-Repository Context:
-- Path: $(pwd)
-- Branch: ${SOURCE_BRANCH}
-- Base branch: ${TARGET_BRANCH}
-- Sample files: ${REPO_FILES}
-
-User Request:
-${MR_NOTE_INSTRUCTION}
-
-Your job:
-1. Analyze the repository structure
-2. Implement the requested changes based on the user instruction above
-3. Generate a unified diff patch with your changes
-4. Enclose the patch in triple backticks with 'diff' language marker
-
-Requirements:
-- Produce working, tested code
-- Follow existing code style and patterns
-- Include necessary imports and dependencies
-- Add inline comments for complex logic
-- Check if there is an appropriate .gitignore file; if not, create one based on the current technology stack. If it already exists, update it to match the technology stack and ensure it includes these automation files: patch_raw.txt, todo.md, plan.json, commit_msg.txt, mr_summary.txt
-
-Output format:
-\`\`\`diff
-[your unified diff here]
-\`\`\`
-
-Generate the implementation now."
+# Load MR update implementation prompt template
+IMPL_PROMPT=$(load_prompt "mr_update" \
+  "repo_path=$(pwd)" \
+  "branch_name=${SOURCE_BRANCH}" \
+  "target_branch=${TARGET_BRANCH}" \
+  "repo_files=${REPO_FILES}" \
+  "user_instruction=${MR_NOTE_INSTRUCTION}")
 
 echo "[INFO] Invoking Copilot for code generation (timeout: 3600s)..."
 if timeout 3600 copilot -p "$IMPL_PROMPT" --allow-all-tools > patch_raw.txt 2>&1; then
@@ -259,21 +236,11 @@ if [ "$HAS_CHANGES" = true ]; then
   
   # Generate summary of changes
   echo "[INFO] Generating summary of changes..."
-  
-  SUMMARY_PROMPT="Generate a concise summary of the code changes that were made.
-  
-Changes:
-$(git log --oneline -1)
-$(git diff HEAD~1 --stat)
 
-Requirements:
-- Start with a brief one-line summary
-- List key changes as bullet points
-- Be clear and professional
-- Output ONLY the summary, no extra context
-- Write the summary to a file named 'mr_summary.txt'
-
-Generate the summary now."
+  # Load summary generation prompt template
+  SUMMARY_PROMPT=$(load_prompt "mr_summary" \
+    "commit_log=$(git log --oneline -1)" \
+    "changes_stat=$(git diff HEAD~1 --stat)")
 
   timeout 60 copilot -p "$SUMMARY_PROMPT" --allow-all-tools 2>&1 || true
   
@@ -286,13 +253,11 @@ Generate the summary now."
   
   # Post completion comment to MR with summary
   echo "[INFO] Posting completion comment to MR ${TARGET_MR_IID}..."
-  
-  COMPLETION_BODY="🤖 Copilot Coding completed! ✅
 
-**Changes Applied:**
-${CHANGE_SUMMARY}
-
-**Commit:** \`${COMMIT_MSG}\`"
+  # Load completion message template
+  COMPLETION_BODY=$(load_prompt "mr_update_completion" \
+    "change_summary=${CHANGE_SUMMARY}" \
+    "commit_message=${COMMIT_MSG}")
 
   if [ -n "${CI_PIPELINE_URL:-}" ]; then
     COMPLETION_BODY="${COMPLETION_BODY}
@@ -315,10 +280,9 @@ else
   
   # Post comment about no changes
   echo "[INFO] Posting no-changes comment to MR ${TARGET_MR_IID}..."
-  
-  NO_CHANGE_BODY="🤖 Copilot analyzed your request but determined no changes are needed.
 
-**Request:** ${MR_NOTE_INSTRUCTION}"
+  # Load no-changes message template
+  NO_CHANGE_BODY=$(load_prompt "mr_no_changes" "user_instruction=${MR_NOTE_INSTRUCTION}")
 
   if [ -n "${CI_PIPELINE_URL:-}" ]; then
     NO_CHANGE_BODY="${NO_CHANGE_BODY}

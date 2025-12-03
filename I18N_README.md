@@ -23,6 +23,10 @@ prompts/
 │   ├── commit_msg.txt
 │   ├── mr_completion.txt
 │   ├── mr_exists.txt
+│   ├── mr_update.txt
+│   ├── mr_summary.txt
+│   ├── mr_update_completion.txt
+│   ├── mr_no_changes.txt
 │   └── code_review.txt
 ├── zh/               # Chinese prompts
 │   ├── issue_ack.txt
@@ -31,6 +35,10 @@ prompts/
 │   ├── commit_msg.txt
 │   ├── mr_completion.txt
 │   ├── mr_exists.txt
+│   ├── mr_update.txt
+│   ├── mr_summary.txt
+│   ├── mr_update_completion.txt
+│   ├── mr_no_changes.txt
 │   └── code_review.txt
 └── ja/               # Japanese prompts
     ├── issue_ack.txt
@@ -39,6 +47,10 @@ prompts/
     ├── commit_msg.txt
     ├── mr_completion.txt
     ├── mr_exists.txt
+    ├── mr_update.txt
+    ├── mr_summary.txt
+    ├── mr_update_completion.txt
+    ├── mr_no_changes.txt
     └── code_review.txt
 ```
 
@@ -122,11 +134,31 @@ Create the following files in `prompts/<lang_code>/`:
    Variables: {mr_url}, {copilot_username}, {assigner_username}
    ```
 
-7. **code_review.txt** - Code review prompt
+7. **mr_update.txt** - MR update implementation prompt
    ```
-   Variables: {mr_title}, {mr_description}, {source_branch}, {target_branch},
-              {changed_files}, {commit_messages}, {code_diff}
+   Variables: {repo_path}, {branch_name}, {target_branch}, {repo_files}, {user_instruction}
    ```
+
+8. **mr_summary.txt** - Changes summary generation
+   ```
+   Variables: {commit_log}, {changes_stat}
+   ```
+
+9. **mr_update_completion.txt** - MR update completion message
+   ```
+   Variables: {change_summary}, {commit_message}
+   ```
+
+10. **mr_no_changes.txt** - No changes needed message
+    ```
+    Variables: {user_instruction}
+    ```
+
+11. **code_review.txt** - Code review prompt
+    ```
+    Variables: {mr_title}, {mr_description}, {source_branch}, {target_branch},
+               {changed_files}, {commit_messages}, {code_diff}
+    ```
 
 ### Step 3: Test the New Language
 

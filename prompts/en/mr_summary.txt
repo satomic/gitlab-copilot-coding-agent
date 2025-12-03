@@ -1,0 +1,14 @@
+Generate a concise summary of the code changes that were made.
+
+Changes:
+{commit_log}
+{changes_stat}
+
+Requirements:
+- Start with a brief one-line summary
+- List key changes as bullet points
+- Be clear and professional
+- Output ONLY the summary, no extra context
+- Write the summary to a file named 'mr_summary.txt'
+
+Generate the summary now.

@@ -1,0 +1,6 @@
+🤖 Copilot Coding completed! ✅
+
+**Changes Applied:**
+{change_summary}
+
+**Commit:** `{commit_message}`
