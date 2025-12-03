@@ -86,3 +86,16 @@ mr_update:
   artifacts:
     paths:
       - repo-b/patch_raw.txt
+
+# Job for MR reviewer workflow
+mr_review:
+  stage: implement
+  rules:
+    - if: $TRIGGER_TYPE == "mr_reviewer"
+  image: satomic/copilot-cli:latest
+  script:
+    - bash scripts/mr_review.sh
+  artifacts:
+    paths:
+      - repo-b/review_raw.txt
+      - repo-b/review_summary.txt

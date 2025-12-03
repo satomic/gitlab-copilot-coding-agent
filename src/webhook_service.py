@@ -126,40 +126,40 @@ def _validate_signature() -> bool:
 
 def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
     """Extract variables from MR note event for pipeline.
-    
+
     Raises:
         ValueError: If required fields are missing or copilot-agent not mentioned.
     """
     note_attrs = payload.get("object_attributes") or {}
     note_text = note_attrs.get("note", "")
-    
+
     # Check if copilot agent is mentioned
     agent_mention = f"@{settings.copilot_agent_username}"
     if agent_mention not in note_text:
         raise ValueError(f"{agent_mention} not mentioned in note")
-    
+
     mr = payload.get("merge_request") or {}
     project = payload.get("project") or {}
     user = payload.get("user") or {}
-    
+
     source_branch = mr.get("source_branch", "")
     target_branch = mr.get("target_branch", "")
     mr_iid = mr.get("iid", "")
     mr_id = mr.get("id", "")
-    
+
     target_repo_url = (
         project.get("http_url")
         or project.get("git_http_url")
         or ""
     )
-    
+
     target_project_id = project.get("id") or mr.get("target_project_id")
     target_project_path = project.get("path_with_namespace", "")
-    
+
     # Extract instruction from note (remove agent mention prefix)
     agent_mention = f"@{settings.copilot_agent_username}"
     instruction = note_text.replace(agent_mention, "").strip()
-    
+
     variables = {
         "TRIGGER_TYPE": "mr_note",
         "MR_NOTE_INSTRUCTION": instruction,
@@ -179,11 +179,11 @@ def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
         "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
     }
-    
+
     missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "SOURCE_BRANCH", "TARGET_MR_IID") if not variables.get(k)]
     if missing:
         raise ValueError(f"Missing required MR/project fields: {', '.join(missing)}")
-    
+
     logger.debug(
         "Extracted MR note vars project_id=%s source_branch=%s target_branch=%s mr_iid=%s",
         variables["TARGET_PROJECT_ID"],
@@ -191,7 +191,93 @@ def _extract_mr_note_variables(payload: Dict[str, Any]) -> Dict[str, str]:
         variables["TARGET_BRANCH"],
         variables["TARGET_MR_IID"],
     )
-    
+
+    return variables
+
+
+def _extract_mr_reviewer_variables(payload: Dict[str, Any]) -> Dict[str, str]:
+    """Extract variables from MR reviewer assignment event for pipeline.
+
+    Raises:
+        ValueError: If required fields are missing or copilot-agent not assigned as reviewer.
+    """
+    mr = payload.get("object_attributes") or {}
+    project = payload.get("project") or {}
+    user = payload.get("user") or {}
+    changes = payload.get("changes") or {}
+
+    action = (mr.get("action") or "").lower()
+    allowed_actions = {"open", "reopen", "update", "edited"}
+    if action not in allowed_actions:
+        logger.debug("Ignoring action '%s' (allowed=%s)", action, allowed_actions)
+        raise ValueError(f"Ignoring unsupported MR action '{action}'")
+
+    # Check if Copilot is assigned as reviewer in the changes
+    reviewers_change = changes.get("reviewers") or {}
+    current_reviewers = reviewers_change.get("current") or []
+
+    is_copilot_reviewer = False
+    if current_reviewers and len(current_reviewers) > 0:
+        for reviewer in current_reviewers:
+            reviewer_username = reviewer.get("username", "")
+            if reviewer_username == settings.copilot_agent_username:
+                is_copilot_reviewer = True
+                logger.info("%s assigned as reviewer detected, will trigger pipeline", settings.copilot_agent_username)
+                break
+
+    if not is_copilot_reviewer:
+        logger.info("%s not assigned as reviewer in changes, skipping pipeline trigger", settings.copilot_agent_username)
+        raise ValueError(f"{settings.copilot_agent_username} not assigned as reviewer, ignoring event")
+
+    source_branch = mr.get("source_branch", "")
+    target_branch = mr.get("target_branch", "")
+    mr_iid = mr.get("iid", "")
+    mr_id = mr.get("id", "")
+    mr_title = mr.get("title", "")
+    mr_description = mr.get("description", "")
+
+    target_repo_url = (
+        project.get("http_url")
+        or project.get("git_http_url")
+        or ""
+    )
+
+    target_project_id = project.get("id") or mr.get("target_project_id")
+    target_project_path = project.get("path_with_namespace", "")
+
+    variables = {
+        "TRIGGER_TYPE": "mr_reviewer",
+        "TARGET_REPO_URL": target_repo_url,
+        "TARGET_BRANCH": target_branch,
+        "SOURCE_BRANCH": source_branch,
+        "TARGET_PROJECT_ID": str(target_project_id or ""),
+        "TARGET_PROJECT_PATH": target_project_path,
+        "TARGET_MR_IID": str(mr_iid),
+        "TARGET_MR_ID": str(mr_id),
+        "MR_TITLE": mr_title,
+        "MR_DESCRIPTION": mr_description,
+        "MR_URL": mr.get("url", ""),
+        "MR_AUTHOR_ID": str(mr.get("author_id", "")),
+        "MR_ACTION": action,
+        "MR_STATE": mr.get("state", ""),
+        "REVIEWER_ASSIGNER_ID": str(user.get("id", "")),
+        "REVIEWER_ASSIGNER_USERNAME": user.get("username", ""),
+        "COPILOT_AGENT_USERNAME": settings.copilot_agent_username,
+        "COPILOT_AGENT_COMMIT_EMAIL": settings.copilot_agent_commit_email,
+    }
+
+    missing = [k for k in ("TARGET_REPO_URL", "TARGET_PROJECT_ID", "SOURCE_BRANCH", "TARGET_MR_IID") if not variables.get(k)]
+    if missing:
+        raise ValueError(f"Missing required MR/project fields: {', '.join(missing)}")
+
+    logger.debug(
+        "Extracted MR reviewer vars project_id=%s source_branch=%s target_branch=%s mr_iid=%s",
+        variables["TARGET_PROJECT_ID"],
+        variables["SOURCE_BRANCH"],
+        variables["TARGET_BRANCH"],
+        variables["TARGET_MR_IID"],
+    )
+
     return variables
 
 
@@ -300,14 +386,14 @@ def _persist_payload(payload: Dict[str, Any]) -> Path:
 
 @app.post("/webhook")
 def issue_webhook() -> Any:
-    """Handle GitLab issue update events and MR note events, triggering the CI pipeline."""
+    """Handle GitLab issue update events, MR note events, and MR reviewer events, triggering the CI pipeline."""
     # Validate webhook signature
     if not _validate_signature():
         return jsonify({"status": "ignored", "reason": "Invalid webhook token"}), 401
 
     event_name = request.headers.get("X-Gitlab-Event")
     logger.debug("Incoming headers: %s", _sanitize_headers(request.headers))
-    if event_name not in  ["Issue Hook", "Note Hook"]:
+    if event_name not in  ["Issue Hook", "Note Hook", "Merge Request Hook"]:
         logger.debug("Ignoring event: %s", event_name)
         return jsonify({"status": "ignored", "reason": "Unsupported event type"}), 202
 
@@ -319,7 +405,7 @@ def issue_webhook() -> Any:
     saved_path = _persist_payload(payload)
     logger.info("Persisted webhook payload to %s", saved_path)
 
-    # Determine if this is a MR note or issue event
+    # Determine event type and extract variables
     try:
         if event_name == "Note Hook":
             noteable_type = payload.get("object_attributes", {}).get("noteable_type")
@@ -329,6 +415,9 @@ def issue_webhook() -> Any:
             else:
                 logger.debug("Ignoring note on %s", noteable_type)
                 return jsonify({"status": "ignored", "reason": f"Note on {noteable_type} not supported"}), 202
+        elif event_name == "Merge Request Hook":
+            logger.info("Processing MR reviewer event")
+            vars_for_pipeline = _extract_mr_reviewer_variables(payload)
         else:
             logger.info("Processing issue event")
             vars_for_pipeline = _extract_variables(payload)

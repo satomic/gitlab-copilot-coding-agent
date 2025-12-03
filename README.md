@@ -2,7 +2,7 @@
 
 [中文](./README_CN.md) | English
 
-A fully automated coding agent powered by GitHub Copilot CLI and GitLab CI/CD. This system enables autonomous code implementation through issue assignments and merge request comments. If you are interested in AI Code Review in GitLab, refer to [gitlab-copilot-code-review](https://github.com/satomic/gitlab-copilot-code-review).
+A fully automated coding agent powered by GitHub Copilot CLI and GitLab CI/CD. This system enables autonomous code implementation and intelligent code review through issue assignments, merge request comments, and merge request reviewer assignments.
 
 ## Demo & Example
 **Youtube Demo videos**
@@ -27,6 +27,7 @@ graph TB
     subgraph "App Repository (Target Repo)"
         A[GitLab Issue/MR] -->|Issue assign to Copilot| C[Webhook Trigger]
         A[GitLab Issue/MR] -->|MR comment @copilot-agent| C[Webhook Trigger]
+        A[GitLab Issue/MR] -->|MR assign Copilot as Reviewer| C[Webhook Trigger]
     end
     
     subgraph "Webhook Service"
@@ -39,13 +40,16 @@ graph TB
         F -->|Start Pipeline| G[CI/CD Pipeline]
         G -->|Issue: ack → plan → create_mr| H[Issue Workflow]
         G -->|MR Note: mr_update only| I[MR Note Workflow]
+        G -->|MR Reviewer: mr_review| L[MR Review Workflow]
         H -->|implement → finalize| J[Copilot CLI]
         I -->|implement changes| J
+        L -->|perform code review| J
         J -->|Generate Code| K[Git Commit & Push]
     end
-    
+
     K -->|Update| A
     J -->|Post Comments| A
+    L -->|Post Review Comments| A
     
     style D fill:#e1f5ff
     style G fill:#fff4e1
@@ -69,9 +73,16 @@ Implement Code → Push Changes → Update MR & Issue
 
 **MR Note Workflow** (Quick updates):
 ```
-Comment @copilot-agent in MR → Webhook → Trigger Pipeline → 
-Acknowledge → Implement Changes → Push to Source Branch → 
+Comment @copilot-agent in MR → Webhook → Trigger Pipeline →
+Acknowledge → Implement Changes → Push to Source Branch →
 Post Summary Comment
+```
+
+**MR Reviewer Workflow** (Intelligent code review):
+```
+Assign Copilot as MR Reviewer → Webhook → Trigger Pipeline →
+Acknowledge → Analyze Code Changes → Perform Comprehensive Review →
+Post Detailed Review Comment
 ```
 
 ## 📋 Prerequisites
@@ -213,10 +224,10 @@ Post Summary Comment
 
 1. Go to your **App Repository** → **Settings** → **Webhooks**
 
-2. **Create Issue Webhook**
+2. **Create Webhook**
    - URL: `http://your-server-ip:8080/webhook`
    - Secret Token: (same as `WEBHOOK_SECRET_TOKEN`)
-   - Trigger: ✅ **Issues events** and ✅ **Comments** (note events)
+   - Trigger: ✅ **Issues events**, ✅ **Comments** (note events), and ✅ **Merge request events**
    - Click **Add webhook**
    ![#webhook](images/webhook.png)
 
@@ -244,7 +255,13 @@ Post Summary Comment
    - Verify pipeline execution and code changes
    ![#mr-update-ppl](images/mr-update-ppl.png)
 
-3. **Check Logs**
+3. **Test MR Reviewer**
+   - Create or open a test MR in App Repository
+   - Assign Copilot user as a Reviewer
+   - Verify pipeline execution and review comment posting
+   - Check the detailed code review report posted by Copilot
+
+4. **Check Logs**
    ```bash
    # Webhook service logs
    docker logs -f gitlab-copilot-coding-agent-hook
@@ -302,6 +319,31 @@ Post Summary Comment
    - Implement the changes
    - Commit and push to the MR branch
    - Post a summary of changes
+
+### For Developers: Using MR Reviewer for Code Review
+
+1. **On the MR page**, assign Copilot user as a Reviewer
+   - Find the "Reviewers" option on the right side of the MR page
+   - Select the Copilot user (e.g., copilot-agent)
+
+2. **Copilot will**:
+   - Automatically trigger the code review workflow
+   - Analyze all code changes between source and target branches
+   - Perform comprehensive code review including:
+     - Code quality and maintainability
+     - Best practices and design patterns
+     - Security vulnerability checks
+     - Performance analysis
+     - Test coverage assessment
+     - Documentation completeness
+   - Post detailed review report in MR, categorized by severity
+   - Provide specific improvement suggestions and recommended fixes
+
+3. **Review Report Contents**:
+   - Overall assessment summary
+   - Issues categorized by severity (Critical, Major, Minor, Suggestions)
+   - Each issue includes file location, detailed description, and fix recommendations
+   - Final review recommendation: APPROVE, REQUEST_CHANGES, or NEEDS_DISCUSSION
 
 ### Best Practices
 

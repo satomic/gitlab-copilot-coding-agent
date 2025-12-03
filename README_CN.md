@@ -2,7 +2,7 @@
 
 中文 | [English](./README.md)
 
-一个由 GitHub Copilot CLI 和 GitLab CI/CD 驱动的全自动代码智能体。该系统通过 Issue 分配和 Merge Request 评论实现自主代码实现。如果你关注在GitLab中实现AI Code Review，参考[gitlab-copilot-code-review](https://github.com/satomic/gitlab-copilot-code-review)。
+一个由 GitHub Copilot CLI 和 GitLab CI/CD 驱动的全自动代码智能体。该系统通过 Issue 分配、Merge Request 评论以及 Merge Request Reviewer 指定实现自主代码实现和智能代码审查。
 
 ## Demo 演示
 
@@ -31,6 +31,7 @@ graph TB
     subgraph "应用仓库（目标仓库）"
         A[GitLab Issue/MR] -->|issue分配给 Copilot| C[Webhook 触发]
         A[GitLab Issue/MR] -->|MR评论 @copilot-agent| C[Webhook 触发]
+        A[GitLab Issue/MR] -->|MR指定 Copilot 为 Reviewer| C[Webhook 触发]
     end
     
     subgraph "Webhook 服务"
@@ -43,13 +44,16 @@ graph TB
         F -->|启动 Pipeline| G[CI/CD Pipeline]
         G -->|Issue 流程: ack → plan → create_mr| H[Issue 工作流]
         G -->|MR Note 流程: mr_update| I[MR Note 工作流]
+        G -->|MR Reviewer 流程: mr_review| L[MR Review 工作流]
         H -->|implement → finalize| J[Copilot CLI]
         I -->|实现变更| J
+        L -->|执行代码审查| J
         J -->|生成代码| K[Git 提交和推送]
     end
-    
+
     K -->|更新| A
     J -->|发布评论| A
+    L -->|发布审查评论| A
     
     style D fill:#e1f5ff
     style G fill:#fff4e1
@@ -73,9 +77,16 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
 
 **MR Note 工作流**（快速更新）：
 ```
-在 MR 中评论 @copilot-agent → Webhook → 触发 Pipeline → 
-确认 → 实现变更 → 推送到源分支 → 
+在 MR 中评论 @copilot-agent → Webhook → 触发 Pipeline →
+确认 → 实现变更 → 推送到源分支 →
 发布总结评论
+```
+
+**MR Reviewer 工作流**（智能代码审查）：
+```
+指定 Copilot 为 MR Reviewer → Webhook → 触发 Pipeline →
+确认 → 分析代码变更 → 执行全面审查 →
+发布详细审查评论
 ```
 
 ## 📋 前提条件
@@ -220,10 +231,10 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
 
 1. 前往你的**应用仓库** → **Settings** → **Webhooks**
 
-2. **创建 Issue Webhook**
+2. **创建 Webhook**
    - URL：`http://your-server-ip:8080/webhook`
    - 密钥令牌：（与 `WEBHOOK_SECRET_TOKEN` 相同）
-   - 触发器：✅ **Issues events** 和 ✅ **Comments** (note events)
+   - 触发器：✅ **Issues events**、✅ **Comments** (note events) 和 ✅ **Merge request events**
    - 点击 **Add webhook**
    ![#webhook](images/webhook.png)
 
@@ -251,7 +262,13 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    - 验证 pipeline 执行和代码变更
    ![#mr-update-ppl](images/mr-update-ppl.png)
 
-3. **检查日志**
+3. **测试 MR Reviewer**
+   - 在应用仓库中创建或打开测试 MR
+   - 在 Reviewers 中指定 Copilot 用户
+   - 验证 pipeline 执行和审查评论发布
+   - 查看 Copilot 发布的详细代码审查报告
+
+4. **检查日志**
    ```bash
    # Webhook 服务日志
    docker logs -f gitlab-copilot-coding-agent-hook
@@ -309,6 +326,31 @@ Issue 分配给 Copilot → Webhook → 触发 Pipeline →
    - 实现更改
    - 提交并推送到 MR 分支
    - 发布更改摘要
+
+### 开发者：使用 MR Reviewer 进行代码审查
+
+1. **在 MR 页面**，将 Copilot 用户指定为 Reviewer
+   - 在 MR 页面右侧找到 "Reviewers" 选项
+   - 选择 Copilot 用户（如 copilot-agent）
+
+2. **Copilot 将会**：
+   - 自动触发代码审查流程
+   - 分析源分支和目标分支之间的所有代码变更
+   - 执行全面的代码审查，包括：
+     - 代码质量和可维护性
+     - 最佳实践和设计模式
+     - 安全漏洞检查
+     - 性能问题分析
+     - 测试覆盖率评估
+     - 文档完整性检查
+   - 在 MR 中发布详细的审查报告，按严重程度分类问题
+   - 提供具体的改进建议和推荐修复方案
+
+3. **审查报告内容**：
+   - 整体评估摘要
+   - 按严重程度分类的问题列表（Critical、Major、Minor、Suggestions）
+   - 每个问题包含文件位置、详细描述和修复建议
+   - 最终审查建议：APPROVE、REQUEST_CHANGES 或 NEEDS_DISCUSSION
 
 ### 最佳实践
 
