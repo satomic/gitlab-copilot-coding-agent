@@ -20,7 +20,7 @@
 - المسألة: [تطبيق استقبال Webhook](https://gitlab.com/agentic-devops/app-repo-01/-/issues/23)
 - طلب الدمج: [تطبيق استقبال Webhook (#23)](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/28)
 - تحديث طلب الدمج بالتعليق: [@copilot-agent تعديل ملف readme إلى العربية](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/28#note_2935174921)
-- مراجعة الشفرة: [تعيين Copilot كمراجع MR](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/26#note_2930279091)
+- مراجعة الشفرة: [تعيين Copilot كمراجع MR](https://gitlab.com/agentic-devops/app-repo-01/-/merge_requests/28#note_2935188042)
 
 ## 🏗️ البنية المعمارية
 
