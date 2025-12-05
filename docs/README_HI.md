@@ -1,6 +1,6 @@
 # GitLab के लिए Copilot कोडिंग एजेंट
 
-[English](../README.md) | [中文](./README_CN.md) | [日本語](./README_JA.md) | हिन्दी | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md)
+[English](../README.md) | [中文](./README_CN.md) | [日本語](./README_JA.md) | हिन्दी | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md) | [العربية](./README_AR.md)
 
 GitHub Copilot CLI और GitLab CI/CD द्वारा संचालित एक पूर्ण स्वचालित कोडिंग एजेंट। यह सिस्टम issue assignments, merge request comments, और merge request reviewer assignments के माध्यम से स्वायत्त कोड कार्यान्वयन और बुद्धिमान कोड समीक्षा को सक्षम बनाता है।
 

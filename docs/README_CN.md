@@ -1,6 +1,6 @@
 # Copilot Coding Agent for GitLab
 
-[English](../README.md) | 中文 | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md)
+[English](../README.md) | 中文 | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md) | [العربية](./README_AR.md)
 
 一个由 GitHub Copilot CLI 和 GitLab CI/CD 驱动的全自动代码智能体。该系统通过 Issue 分配、Merge Request 评论以及 Merge Request Reviewer 指定实现自主代码实现和智能代码审查。
 

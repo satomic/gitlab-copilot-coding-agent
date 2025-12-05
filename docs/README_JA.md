@@ -1,6 +1,6 @@
 # GitLab 用 Copilot コーディングエージェント
 
-[English](../README.md) | [中文](./README_CN.md) | 日本語 | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md)
+[English](../README.md) | [中文](./README_CN.md) | 日本語 | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | [ภาษาไทย](./README_TH.md) | [العربية](./README_AR.md)
 
 GitHub Copilot CLI と GitLab CI/CD を活用した完全自動コーディングエージェント。Issue 割り当て、マージリクエストコメント、マージリクエストレビュアー割り当てを通じて、自律的なコード実装とインテリジェントなコードレビューを実現します。
 

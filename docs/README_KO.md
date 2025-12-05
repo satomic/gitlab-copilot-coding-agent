@@ -1,6 +1,6 @@
 # GitLab용 Copilot 코딩 에이전트
 
-[English](../README.md) | [中文](./README_CN.md) | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | 한국어 | [ภาษาไทย](./README_TH.md)
+[English](../README.md) | [中文](./README_CN.md) | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | 한국어 | [ภาษาไทย](./README_TH.md) | [العربية](./README_AR.md)
 
 GitHub Copilot CLI와 GitLab CI/CD로 구동되는 완전 자동화된 코딩 에이전트입니다. 이 시스템은 issue 할당, merge request 댓글, merge request 리뷰어 할당을 통해 자율적인 코드 구현과 지능형 코드 검토를 가능하게 합니다.
 

@@ -1,6 +1,6 @@
 # Copilot Coding Agent สำหรับ GitLab
 
-[English](../README.md) | [中文](./README_CN.md) | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | ภาษาไทย
+[English](../README.md) | [中文](./README_CN.md) | [日本語](./README_JA.md) | [हिन्दी](./README_HI.md) | [한국어](./README_KO.md) | ภาษาไทย | [العربية](./README_AR.md)
 
 ตัวแทนเขียนโค้ดอัตโนมัติที่สมบูรณ์ซึ่งขับเคลื่อนโดย GitHub Copilot CLI และ GitLab CI/CD ระบบนี้เปิดใช้งานการดำเนินการเขียนโค้ดอัตโนมัติและการตรวจสอบโค้ดอัจฉริยะผ่านการมอบหมาย issue การแสดงความคิดเห็นใน merge request และการมอบหมายผู้ตรวจสอบ merge request
 
