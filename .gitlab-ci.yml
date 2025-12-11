@@ -15,7 +15,7 @@ issue_workflow:
   stage: implement
   rules:
     - if: $TRIGGER_TYPE == "issue_assignee"
-  image: satomic/copilot-cli:latest
+  image: satomic/copilot-cli:0.0.368
   script:
     - copilot --version
     - bash scripts/issue_workflow.sh
@@ -33,7 +33,7 @@ mr_update:
   stage: implement
   rules:
     - if: $TRIGGER_TYPE == "mr_note"
-  image: satomic/copilot-cli:latest
+  image: satomic/copilot-cli:0.0.368
   script:
     - copilot --version
     - bash scripts/mr_update.sh
@@ -46,7 +46,7 @@ mr_review:
   stage: implement
   rules:
     - if: $TRIGGER_TYPE == "mr_reviewer"
-  image: satomic/copilot-cli:latest
+  image: satomic/copilot-cli:0.0.368
   script:
     - copilot --version
     - |
