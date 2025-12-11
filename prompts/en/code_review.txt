@@ -59,4 +59,4 @@ You MUST create a file named 'review_findings.json' with this EXACT structure:
 5. Be specific and actionable in descriptions and suggestions
 6. If no issues found, use empty findings array: "findings": []
 
-Write the JSON file now. Do not output anything else.
+Please write the review_findings.json file with your code review findings. You can briefly acknowledge the review task, then create the file.

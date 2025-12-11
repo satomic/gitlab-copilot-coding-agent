@@ -97,19 +97,51 @@ IMPL_PROMPT=$(load_prompt "mr_update" \
   "user_instruction=${MR_NOTE_INSTRUCTION}")
 
 echo "[INFO] Invoking Copilot for code generation (timeout: 3600s)..."
-if timeout 3600 copilot -p "$IMPL_PROMPT" --allow-all-tools > patch_raw.txt 2>&1; then
-  echo "[INFO] Copilot code generation completed"
-  # Clean ANSI escape sequences and carriage returns
-  sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' patch_raw.txt | tr -d '\r' > patch_clean.txt
-  mv patch_clean.txt patch_raw.txt
-else
-  EXIT_CODE=$?
-  if [ $EXIT_CODE -eq 124 ]; then
-    echo "[ERROR] Copilot timed out after 3600 seconds" >&2
+
+# Retry logic for Copilot code generation
+MAX_RETRIES=3
+RETRY_DELAY=10
+RETRY_COUNT=0
+SUCCESS=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  echo "[INFO] Attempt $RETRY_COUNT/$MAX_RETRIES..."
+
+  if timeout 3600 copilot -p "$IMPL_PROMPT" --allow-all-tools > patch_raw.txt 2>&1; then
+    echo "[INFO] Copilot code generation completed"
+    # Clean ANSI escape sequences and carriage returns
+    sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' patch_raw.txt | tr -d '\r' > patch_clean.txt
+    mv patch_clean.txt patch_raw.txt
+    SUCCESS=true
+    break
   else
-    echo "[ERROR] Copilot failed with exit code ${EXIT_CODE}" >&2
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -eq 124 ]; then
+      echo "[ERROR] Copilot timed out after 3600 seconds" >&2
+      cat patch_raw.txt >&2
+      exit 1
+    else
+      echo "[WARN] Copilot failed with exit code ${EXIT_CODE} on attempt $RETRY_COUNT" >&2
+      cat patch_raw.txt >&2
+
+      # Check if there are any changes despite the error
+      if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+        echo "[INFO] Found code changes despite error, attempting to continue..." >&2
+        SUCCESS=true
+        break
+      fi
+
+      if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+        echo "[INFO] Retrying in ${RETRY_DELAY} seconds..." >&2
+        sleep $RETRY_DELAY
+      fi
+    fi
   fi
-  cat patch_raw.txt >&2
+done
+
+if [ "$SUCCESS" = false ]; then
+  echo "[ERROR] Failed to complete code generation after $MAX_RETRIES attempts" >&2
   exit 1
 fi
 
